@@ -1,4 +1,7 @@
 
+test :=(){
+    return 0;
+}
 
 main := (argc: int, argv: []string){
     return 0;

@@ -14,6 +14,7 @@ ALPHA   [a-zA-Z_]
 
 "int"   {return INT;}
 "string"   {return STRING;}
+"return"        {return RETURN;}
 ":="    {return DEFINE_AND_ASSIGN;}
 ":"    {return DEFINE;}
 "("     {return '(';}
