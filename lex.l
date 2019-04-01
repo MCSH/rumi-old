@@ -7,26 +7,27 @@ ALPHA   [a-zA-Z_]
 
 %{
 #include <string>
+#include "parse.hpp"
 %}
 
 %%
 
-"int"   {printf("Type int\n");}
-"string"   {printf("Type string\n");}
-":="    {printf("Define and assign\n");}
-":"    {printf("Define\n");}
-"("     {printf("(\n");}
-")"     {printf(")\n");}
-"{"     {printf("{\n");}
-"}"     {printf("}\n");}
-"["     {printf("[\n");}
-"]"     {printf("]\n");}
-","     {printf(",\n");}
-";"     {printf(";\n");}
+"int"   {return INT;}
+"string"   {return STRING;}
+":="    {return DEFINE_AND_ASSIGN;}
+":"    {return DEFINE;}
+"("     {return '(';}
+")"     {return ')';}
+"{"     {return '{';}
+"}"     {return '}';}
+"["     {return '[';}
+"]"     {return ']';}
+","     {return ',';}
+";"     {return ';';}
 
-{NONZERODIGIT}{DIGIT}*        {printf("I got digit %s\n", yytext);}
-"0"{OCTDIGIT}*  {printf("I got oct digit %s\n", yytext);}
-{ALPHA}{ALPHANUMERIC}*  { printf("I got %s\n", yytext); }
+{NONZERODIGIT}{DIGIT}*        {yylval.string=new std::string(yytext); return DEC;}
+"0"{OCTDIGIT}*  {yylval.string = new std::string(yytext); return OCT;}
+{ALPHA}{ALPHANUMERIC}*  {yylval.string = new std::string(yytext); return ID;}
 
 {WHITESPACE}+      {/*Discard */}
 
