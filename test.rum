@@ -1,0 +1,5 @@
+
+
+main := (argc: int, argv: []string){
+    return 0;
+}
