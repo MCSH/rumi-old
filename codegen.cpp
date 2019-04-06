@@ -12,7 +12,7 @@ llvm::Value* BlockNode::codegen(CompileContext *cc){
 
 llvm::Function* FunctionNode::codegen(CompileContext *cc){
     std::vector<llvm::Type*> args;
-    auto type = llvm::Type::getDoubleTy(cc->context);
+    auto type = llvm::Type::getInt64Ty(cc->context);
 
     llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
     llvm::Function *f = llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
