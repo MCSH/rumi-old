@@ -1,10 +1,11 @@
 
-OBJS = lex.cpp main.cpp parse.cpp
+OBJS = lex.cpp main.cpp parse.cpp codegen.cpp
 
 CC = g++
+COMPILER_FLAGS = -w -g `llvm-config --cxxflags --ldflags --system-libs --libs core`
 
 rum:	clean $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o rum
+	$(CC) $(COMPILER_FLAGS) $(OBJS) -o rum
 
 lex.cpp: lex.l parse.hpp
 	flex  -o lex.cpp lex.l

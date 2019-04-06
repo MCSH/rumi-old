@@ -1,6 +1,6 @@
 
 test :=(){
-    return 0;
+    return 2;
 }
 
 main := (argc: int, argv: []string){

@@ -1,10 +1,25 @@
+%code requires { #include "node.h" }
+
 %{
+#include "node.h"
 #include <string>
 
 void yyerror(const char *s);
 void yyerror(std::string *s);
 extern int yylex();
+
+BlockNode *programBlock;
+
 %}
+
+%union{
+    std::string *string;
+    BlockNode *program;
+    BlockNode *block;
+    StatementNode *statement;
+    FunctionNode *function;
+    ExprNode *expr;
+}
 
 %token<string> OCT DEC
 %token<string> ID
@@ -13,55 +28,61 @@ extern int yylex();
 %token RETURN
 %token DEFINE
 
-%union{
-    std::string *string;
-}
+%type<program> program top_level
+%type<statement> top_level_code return_stmt
+%type<function> function_definition
+%type<expr> value
+%type<block> code
+
 
 %start program
 %define parse.error verbose
 
 %%
-program:
-       top_level;
+program
+    : top_level {programBlock = $1;};
 
-top_level:
-         top_level_code
-         | top_level top_level_code;
+top_level
+    : top_level_code {$$ = new BlockNode; $$->statements.push_back($1);}
+    | top_level top_level_code { $1->statements.push_back($2); $$=$1;};
 
-top_level_code:
-              function_definition;
+top_level_code
+    : function_definition {$$ = $1;};
 
-function_definition:
-                   ID DEFINE_AND_ASSIGN '(' params ')' '{' code '}' {printf("I decoded a function named %s\n", $1->c_str());};
+function_definition
+    : ID DEFINE_AND_ASSIGN '(' params ')' '{' code '}' { $$ = new FunctionNode(*$1, $7);};
 
-params:
-      param_list
-      | empty;
+params
+    : param_list
+    | empty;
 
-param:
-     ID DEFINE type;
+param
+    : ID DEFINE type;
 
-param_list: 
-          param ',' param_list
-          | param;
+param_list
+    : param ',' param_list
+    | param;
 
-type:
-    STRING
+type
+    : STRING
     | INT
     | array_type;
 
-array_type:
-          '[' ']' type;
+array_type
+    : '[' ']' type;
 
 empty:;
 
-code:
-    RETURN value ';';
+code
+    : return_stmt {$$=new BlockNode; $$->statements.push_back($1);};
 
-value:
-     ID
-     | OCT
-     | DEC;
+return_stmt
+    : RETURN value ';' { $$ = new RetNode($2); };
+
+value
+    : ID { $$ = new IntNode(0);} // TODO
+    | OCT {$$ = new IntNode(strtol($1->c_str(), NULL, 8));}
+    | DEC { $$ = new IntNode(atoi($1->c_str())); };  // TODO check for long?
 
 
 %%
