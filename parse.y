@@ -29,9 +29,9 @@ BlockNode *programBlock;
 %token DEFINE
 
 %type<program> program top_level
-%type<statement> top_level_code return_stmt
+%type<statement> top_level_code return_stmt stmt variable_decl
 %type<function> function_definition
-%type<expr> value
+%type<expr> value expr
 %type<block> code
 
 
@@ -74,10 +74,22 @@ array_type
 empty:;
 
 code
-    : return_stmt {$$=new BlockNode; $$->statements.push_back($1);};
+    : code  stmt {$1->statements.push_back($2); $$ = $1;}
+    | stmt {$$=new BlockNode; $$->statements.push_back($1);};
+
+stmt
+    : return_stmt
+    | variable_decl
+    | function_definition {$$=$1;}
+    ;
+
+variable_decl
+    : ID DEFINE_AND_ASSIGN expr ';' {$$ = new VariableDeclNode(*$1, $3);};
+
+expr: value{$$=$1;};
 
 return_stmt
-    : RETURN value ';' { $$ = new RetNode($2); };
+    : RETURN expr ';' { $$ = new RetNode($2); };
 
 value
     : ID { $$ = new IntNode(0);} // TODO

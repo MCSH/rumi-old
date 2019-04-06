@@ -20,7 +20,11 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
     llvm::BasicBlock *bblock = llvm::BasicBlock::Create(cc->context, "entry", f);
     cc->builder->SetInsertPoint(bblock);
 
+    cc->block.push_back(new BlockContext(bblock));
+
     body -> codegen(cc);
+
+    cc->block.pop_back();
 
 
     llvm::verifyFunction(*f);
@@ -34,4 +38,27 @@ llvm::Value* IntNode::codegen(CompileContext *cc){
 
 llvm::Value* RetNode::codegen(CompileContext *cc){
     return cc->builder->CreateRet(st->codegen(cc));
+}
+
+llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
+    // TODO check global!
+    if(cc->hasBlock()){
+
+        auto bblock = cc->getBlock()->bblock;
+
+        llvm::IRBuilder<> TmpB(bblock, bblock->begin());
+
+        llvm::AllocaInst *alloc = TmpB.CreateAlloca(llvm::Type::getInt64Ty(cc->context), 0, name.c_str());
+
+        cc->getBlock()->namedValues[name.c_str()] = alloc;
+
+        // TODO not needed if no assignment
+
+        llvm::Value *v = expr ->codegen(cc);
+        cc->builder->CreateStore(v, alloc); // TODO tmpb or cc->builder?
+
+        return alloc;
+
+    }
+    return nullptr;
 }

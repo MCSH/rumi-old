@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <llvm/IR/Value.h>
 
+#include <iostream>
+
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/BasicBlock.h"
@@ -15,15 +17,33 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
 
+class BlockContext{
+    public:
+        std::map<std::string, llvm::AllocaInst *> namedValues; // Maybe should be Value*?
+        llvm::BasicBlock *bblock;
+
+        BlockContext(llvm::BasicBlock *bb){
+            this->bblock = bb;
+        }
+};
+
 class CompileContext{
     public:
         llvm::LLVMContext context;
         llvm::IRBuilder<> *builder;
         std::unique_ptr<llvm::Module> module;
-        std::map<std::string, llvm::Value *> namedValues;
+        std::vector<BlockContext *> block;
 
         CompileContext(){
             builder = new llvm::IRBuilder<>(context);
+        }
+
+        bool hasBlock(){
+            return block.size() != 0;
+        }
+
+        BlockContext *getBlock(){
+            return block.back();
         }
 };
 
@@ -56,6 +76,8 @@ class FunctionNode: public StatementNode{
 };
 
 class ExprNode: public StatementNode{
+    public:
+    virtual llvm::Value* codegen(CompileContext *cc)= 0;
 };
 
 class IntNode: public ExprNode{
@@ -74,5 +96,17 @@ class RetNode: public StatementNode{
             this->st = st;
         }
 
+        virtual llvm::Value* codegen(CompileContext *cc);
+};
+
+class VariableDeclNode: public StatementNode{
+    public:
+        std::string name;
+        ExprNode *expr;
+
+        VariableDeclNode(std::string name, ExprNode *expr){
+            this->name = name;
+            this->expr = expr;
+        }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
