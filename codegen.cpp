@@ -86,5 +86,19 @@ llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
         return nullptr;
     }
 
-    return v;
+    return cc->builder->CreateLoad(v, "readtmp");
+}
+
+llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
+    llvm::Function *calleeF = cc->module->getFunction(name.c_str());
+    if(!calleeF){
+        llvm::errs() << "Undefined function " << name << "\n";
+        exit(1);
+        return nullptr;
+    }
+
+    std::vector<llvm::Value *> argsV;
+
+
+    return cc->builder->CreateCall(calleeF, argsV, "calltmp");
 }

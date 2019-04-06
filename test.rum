@@ -4,9 +4,8 @@ test :=(){
 }
 
 main := (argc: int, argv: []string){
-    ans := 0;
-    return 1;
+    ans := test();
+    return ans;
     hey := 1;
-    ans = 2;
     return ans;
 }

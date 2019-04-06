@@ -132,3 +132,14 @@ class VariableLoadNode: public ExprNode{
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
+
+class FunctionCallnode: public ExprNode{
+    public:
+        std::string name;
+        // TODO args
+
+        FunctionCallnode(std::string name){
+            this->name = name;
+        }
+        virtual llvm::Value* codegen(CompileContext *cc);
+};

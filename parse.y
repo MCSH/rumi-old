@@ -32,7 +32,7 @@ BlockNode *programBlock;
 %type<program> program top_level
 %type<statement> top_level_code return_stmt stmt variable_decl variable_assign
 %type<function> function_definition
-%type<expr> value expr
+%type<expr> value expr function_call
 %type<block> code
 
 
@@ -91,7 +91,22 @@ variable_assign
 variable_decl
     : ID DEFINE_AND_ASSIGN expr ';' {$$ = new VariableDeclNode(*$1, $3);};
 
-expr: value{$$=$1;};
+expr
+    : value
+    | function_call;
+
+function_call
+    : ID '(' args ')' {$$=new FunctionCallnode(*$1);};
+
+args
+    : arg_list
+    | empty;
+
+arg_list
+    : arg ',' arg_list
+    | arg;
+
+arg: expr;
 
 return_stmt
     : RETURN expr ';' { $$ = new RetNode($2); };
