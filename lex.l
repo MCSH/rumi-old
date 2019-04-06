@@ -16,6 +16,7 @@ ALPHA   [a-zA-Z_]
 "string"   {return STRING;}
 "return"        {return RETURN;}
 ":="    {return DEFINE_AND_ASSIGN;}
+"="     {return ASSIGN;}
 ":"    {return DEFINE;}
 "("     {return '(';}
 ")"     {return ')';}

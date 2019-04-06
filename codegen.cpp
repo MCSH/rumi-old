@@ -48,17 +48,43 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
 
         llvm::IRBuilder<> TmpB(bblock, bblock->begin());
 
-        llvm::AllocaInst *alloc = TmpB.CreateAlloca(llvm::Type::getInt64Ty(cc->context), 0, name.c_str());
+        llvm::AllocaInst *alloc = TmpB.CreateAlloca(llvm::Type::getInt64Ty(cc->context), 0, name.c_str()); // TODO Why not cc->builder ? 
 
         cc->getBlock()->namedValues[name.c_str()] = alloc;
 
         // TODO not needed if no assignment
 
-        llvm::Value *v = expr ->codegen(cc);
-        cc->builder->CreateStore(v, alloc); // TODO tmpb or cc->builder?
+        if(expr){
+            VariableAssignNode van(name, expr);
+            van.codegen(cc);
+        }
 
         return alloc;
 
     }
     return nullptr;
+}
+
+llvm::Value* VariableAssignNode::codegen(CompileContext *cc){
+    llvm::AllocaInst *alloc = cc->getBlock()->namedValues[name.c_str()];
+    
+    if(!alloc){
+        llvm::errs() << "Undefined variable " << name;
+        return nullptr;
+    }
+
+    llvm::Value *v = expr ->codegen(cc);
+    return cc->builder->CreateStore(v, alloc); // TODO tmpb or cc->builder?
+}
+
+llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
+    llvm::Value *v = cc->getBlock()->namedValues[name.c_str()];
+
+    if(!v){
+        llvm::errs() << "Undefined variable " << name << "\n";
+        exit(1);
+        return nullptr;
+    }
+
+    return v;
 }

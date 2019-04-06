@@ -110,3 +110,25 @@ class VariableDeclNode: public StatementNode{
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
+
+class VariableAssignNode: public StatementNode{
+    public:
+        std::string name;
+        ExprNode *expr;
+
+        VariableAssignNode(std::string name, ExprNode *expr){
+            this->name = name;
+            this->expr = expr;
+        }
+        virtual llvm::Value* codegen(CompileContext *cc);
+};
+
+class VariableLoadNode: public ExprNode{
+    public:
+        std::string name;
+
+        VariableLoadNode(std::string name){
+            this->name = name;
+        }
+        virtual llvm::Value* codegen(CompileContext *cc);
+};

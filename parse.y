@@ -27,9 +27,10 @@ BlockNode *programBlock;
 %token DEFINE_AND_ASSIGN
 %token RETURN
 %token DEFINE
+%token ASSIGN
 
 %type<program> program top_level
-%type<statement> top_level_code return_stmt stmt variable_decl
+%type<statement> top_level_code return_stmt stmt variable_decl variable_assign
 %type<function> function_definition
 %type<expr> value expr
 %type<block> code
@@ -80,8 +81,12 @@ code
 stmt
     : return_stmt
     | variable_decl
+    | variable_assign
     | function_definition {$$=$1;}
     ;
+
+variable_assign
+    : ID ASSIGN expr ';' {$$ = new VariableAssignNode(*$1, $3);};
 
 variable_decl
     : ID DEFINE_AND_ASSIGN expr ';' {$$ = new VariableDeclNode(*$1, $3);};
@@ -92,7 +97,7 @@ return_stmt
     : RETURN expr ';' { $$ = new RetNode($2); };
 
 value
-    : ID { $$ = new IntNode(0);} // TODO
+    : ID { $$ = new VariableLoadNode(*$1);} // TODO
     | OCT {$$ = new IntNode(strtol($1->c_str(), NULL, 8));}
     | DEC { $$ = new IntNode(atoi($1->c_str())); };  // TODO check for long?
 
