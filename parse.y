@@ -19,21 +19,24 @@ BlockNode *programBlock;
     StatementNode *statement;
     FunctionNode *function;
     ExprNode *expr;
+    TypeNode *type;
 }
 
 %token<string> OCT DEC
 %token<string> ID
 %token<string> INT STRING
 %token DEFINE_AND_ASSIGN
+%token RESULTS_IN
 %token RETURN
 %token DEFINE
 %token ASSIGN
 
 %type<program> program top_level
-%type<statement> top_level_code return_stmt stmt variable_decl variable_assign
+%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration
 %type<function> function_definition
 %type<expr> value expr function_call
 %type<block> code
+%type<type> return_type type array_type
 
 
 %start program
@@ -48,10 +51,18 @@ top_level
     | top_level top_level_code { $1->statements.push_back($2); $$=$1;};
 
 top_level_code
-    : function_definition {$$ = $1;};
+    : function_definition {$$ = $1;}
+    | function_declaration{$$=$1;};
 
 function_definition
-    : ID DEFINE_AND_ASSIGN '(' params ')' '{' code '}' { $$ = new FunctionNode(*$1, $7);};
+    : ID DEFINE_AND_ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6));};
+
+function_declaration
+    : ID DEFINE '(' params ')' return_type ';' {$$=new FunctionSignature(*$1, $6);};
+
+return_type
+    : empty {$$=new TypeNode(Types::VOID);}// Void
+    | RESULTS_IN type {$$=$2;};
 
 params
     : param_list
@@ -65,12 +76,12 @@ param_list
     | param;
 
 type
-    : STRING
-    | INT
+    : STRING {$$=new TypeNode(Types::STRING);}
+    | INT {$$=new TypeNode(Types::INT);}
     | array_type;
 
 array_type
-    : '[' ']' type;
+    : '[' ']' type {$$=new TypeNode(Types::STRING);}; // TODO
 
 empty:;
 

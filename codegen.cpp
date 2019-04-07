@@ -11,11 +11,8 @@ llvm::Value* BlockNode::codegen(CompileContext *cc){
 }
 
 llvm::Function* FunctionNode::codegen(CompileContext *cc){
-    std::vector<llvm::Type*> args;
-    auto type = llvm::Type::getInt64Ty(cc->context);
 
-    llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
-    llvm::Function *f = llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
+    llvm::Function *f = fs->codegen(cc);
 
     llvm::BasicBlock *bblock = llvm::BasicBlock::Create(cc->context, "entry", f);
     cc->builder->SetInsertPoint(bblock);
@@ -30,6 +27,14 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
     llvm::verifyFunction(*f);
 
     return f;
+}
+
+llvm::Function* FunctionSignature::codegen(CompileContext *cc){
+    std::vector<llvm::Type*> args;
+    auto type = this->type->codegen(cc);
+
+    llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
+    return llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
 }
 
 llvm::Value* IntNode::codegen(CompileContext *cc){
@@ -101,4 +106,15 @@ llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
 
 
     return cc->builder->CreateCall(calleeF, argsV, "calltmp");
+}
+
+llvm::Type* TypeNode::codegen(CompileContext *cc){
+    switch(type){
+        case Types::INT:
+            return llvm::Type::getInt64Ty(cc->context);
+        case Types::STRING:
+            return llvm::Type::getDoubleTy(cc->context); // TODO
+        case Types::VOID:
+            return llvm::Type::getVoidTy(cc->context);
+    }
 }

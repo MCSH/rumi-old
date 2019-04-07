@@ -1,11 +1,15 @@
 
-test :=(){
+test :=() -> int{
     return 2;
 }
 
-main := (argc: int, argv: []string){
+main := (argc: int, argv: []string) -> int{
     ans := test();
     return ans;
     hey := 1;
     return ans;
 }
+
+t2 : ();
+
+t3: ()-> int;

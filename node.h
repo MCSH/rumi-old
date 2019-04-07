@@ -53,6 +53,21 @@ class Node{
         virtual llvm::Value* codegen(CompileContext *cc)=0;
 };
 
+enum class Types{
+    INT,
+    STRING,
+    VOID
+};
+
+class TypeNode{
+    Types type;
+    public:
+    TypeNode(Types type){
+        this->type = type;
+    }
+    virtual llvm::Type* codegen(CompileContext *cc);
+};
+
 class StatementNode: public Node{
     public:
         virtual llvm::Value* codegen(CompileContext *cc)=0;
@@ -64,15 +79,27 @@ class BlockNode: public Node{
         virtual llvm::Value* codegen(CompileContext *cc);
 };
 
-class FunctionNode: public StatementNode{
+class FunctionSignature: public StatementNode{
     std::string name;
     public:
-    BlockNode *body;
-    FunctionNode(std::string name, BlockNode *body) {
+    TypeNode *type;
+    FunctionSignature(std::string name, TypeNode *type){
         this->name = name;
-        this->body = body;
+        this->type = type;
     }
-        virtual llvm::Function* codegen(CompileContext *cc);
+
+    virtual llvm::Function* codegen(CompileContext *cc);
+};
+
+class FunctionNode: public StatementNode{
+    public:
+    BlockNode *body;
+    FunctionSignature *fs;
+    FunctionNode(BlockNode *body, FunctionSignature *fs) {
+        this->body = body;
+        this->fs = fs;
+    }
+    virtual llvm::Function* codegen(CompileContext *cc);
 };
 
 class ExprNode: public StatementNode{
