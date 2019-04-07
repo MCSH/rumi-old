@@ -33,7 +33,7 @@ llvm::Function* FunctionSignature::codegen(CompileContext *cc){
     std::vector<llvm::Type*> args;
     auto type = this->type->codegen(cc);
 
-    cc->getBlock()->namedTypes[name] = this->type->type;
+    cc->setType(name, this->type->type);
 
     llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
     return llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
@@ -67,7 +67,7 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
             type = expr->type;
         }
 
-        cc->getBlock()->namedTypes[name] = type->type;
+        cc->setType(name, this->type->type);
 
         return alloc;
 

@@ -67,6 +67,15 @@ class CompileContext{
 
             return global->namedTypes[name];
         }
+
+        void setType(std::string name, Types type){
+            if(hasBlock()){
+                block.back()->namedTypes[name] = type;
+                return;
+            }
+
+            global->namedTypes[name] = type;
+        }
 };
 
 class Node{
