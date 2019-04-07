@@ -100,7 +100,7 @@ variable_assign
     : ID ASSIGN expr ';' {$$ = new VariableAssignNode(*$1, $3);};
 
 variable_decl
-    : ID DEFINE_AND_ASSIGN expr ';' {$$ = new VariableDeclNode(*$1, $3);};
+    : ID DEFINE_AND_ASSIGN expr ';' {$$ = new VariableDeclNode(*$1, $3, nullptr);};
 
 expr
     : value

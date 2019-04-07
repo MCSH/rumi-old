@@ -17,9 +17,16 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
 
+enum class Types{
+    INT,
+    STRING,
+    VOID
+};
+
 class BlockContext{
     public:
         std::map<std::string, llvm::AllocaInst *> namedValues; // Maybe should be Value*?
+        std::map<std::string, Types> namedTypes;
         llvm::BasicBlock *bblock;
 
         BlockContext(llvm::BasicBlock *bb){
@@ -33,9 +40,11 @@ class CompileContext{
         llvm::IRBuilder<> *builder;
         std::unique_ptr<llvm::Module> module;
         std::vector<BlockContext *> block;
+        BlockContext *global;
 
         CompileContext(){
             builder = new llvm::IRBuilder<>(context);
+            global = new BlockContext(nullptr);
         }
 
         bool hasBlock(){
@@ -43,7 +52,20 @@ class CompileContext{
         }
 
         BlockContext *getBlock(){
-            return block.back();
+            if(hasBlock())
+                return block.back();
+            return global;
+        }
+
+        Types getType(std::string name){
+            for(std::vector<BlockContext *>::reverse_iterator i=block.rbegin(); i != block.rend(); i++){
+                auto nt = (*i)->namedTypes;
+                auto p = nt.find(name);
+                if(p!=nt.end())
+                    return p->second;
+            }
+
+            return global->namedTypes[name];
         }
 };
 
@@ -53,15 +75,9 @@ class Node{
         virtual llvm::Value* codegen(CompileContext *cc)=0;
 };
 
-enum class Types{
-    INT,
-    STRING,
-    VOID
-};
-
 class TypeNode{
-    Types type;
     public:
+    Types type;
     TypeNode(Types type){
         this->type = type;
     }
@@ -104,13 +120,16 @@ class FunctionNode: public StatementNode{
 
 class ExprNode: public StatementNode{
     public:
+    TypeNode *type;
     virtual llvm::Value* codegen(CompileContext *cc)= 0;
 };
 
 class IntNode: public ExprNode{
     public:
         int value;
-        IntNode(int value): value(value){}
+        IntNode(int value): value(value){
+            type = new TypeNode(Types::INT);
+        }
 
         virtual llvm::Value* codegen(CompileContext *cc);
 };
@@ -130,10 +149,12 @@ class VariableDeclNode: public StatementNode{
     public:
         std::string name;
         ExprNode *expr;
+        TypeNode *type;
 
-        VariableDeclNode(std::string name, ExprNode *expr){
+        VariableDeclNode(std::string name, ExprNode *expr, TypeNode *type){
             this->name = name;
             this->expr = expr;
+            this->type = type;
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
@@ -156,6 +177,7 @@ class VariableLoadNode: public ExprNode{
 
         VariableLoadNode(std::string name){
             this->name = name;
+            // TODO fill in type
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
@@ -167,6 +189,7 @@ class FunctionCallnode: public ExprNode{
 
         FunctionCallnode(std::string name){
             this->name = name;
+            // TODO fill in type
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };

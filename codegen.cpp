@@ -33,6 +33,8 @@ llvm::Function* FunctionSignature::codegen(CompileContext *cc){
     std::vector<llvm::Type*> args;
     auto type = this->type->codegen(cc);
 
+    cc->getBlock()->namedTypes[name] = this->type->type;
+
     llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
     return llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
 }
@@ -55,14 +57,17 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
 
         llvm::AllocaInst *alloc = TmpB.CreateAlloca(llvm::Type::getInt64Ty(cc->context), 0, name.c_str()); // TODO Why not cc->builder ? 
 
-        cc->getBlock()->namedValues[name.c_str()] = alloc;
+        cc->getBlock()->namedValues[name] = alloc;
 
         // TODO not needed if no assignment
 
         if(expr){
             VariableAssignNode van(name, expr);
             van.codegen(cc);
+            type = expr->type;
         }
+
+        cc->getBlock()->namedTypes[name] = type->type;
 
         return alloc;
 
@@ -71,7 +76,7 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
 }
 
 llvm::Value* VariableAssignNode::codegen(CompileContext *cc){
-    llvm::AllocaInst *alloc = cc->getBlock()->namedValues[name.c_str()];
+    llvm::AllocaInst *alloc = cc->getBlock()->namedValues[name];
     
     if(!alloc){
         llvm::errs() << "Undefined variable " << name;
@@ -83,13 +88,15 @@ llvm::Value* VariableAssignNode::codegen(CompileContext *cc){
 }
 
 llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
-    llvm::Value *v = cc->getBlock()->namedValues[name.c_str()];
+    llvm::Value *v = cc->getBlock()->namedValues[name];
 
     if(!v){
         llvm::errs() << "Undefined variable " << name << "\n";
         exit(1);
         return nullptr;
     }
+
+    type = new TypeNode(cc->getType(name));
 
     return cc->builder->CreateLoad(v, "readtmp");
 }
@@ -101,6 +108,8 @@ llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
         exit(1);
         return nullptr;
     }
+
+    type = new TypeNode(cc->getType(name));
 
     std::vector<llvm::Value *> argsV;
 

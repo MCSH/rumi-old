@@ -25,8 +25,7 @@ int main(int argc, char **argv){
 
     cc->module->print(llvm::outs(), nullptr);
 
-
-    // TODO place ment?
+    return 0; // TODO
 
     llvm::InitializeAllTargetInfos();
     llvm::InitializeAllTargets();
