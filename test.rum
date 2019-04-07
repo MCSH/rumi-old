@@ -3,13 +3,21 @@ test :=() -> int{
     return 2;
 }
 
+t4: ();
+
+
 main := (argc: int, argv: []string) -> int{
     ans := test();
     return ans;
     hey := 1;
     return ans;
+    took := t4();
 }
 
 t2 : ();
 
 t3: ()-> int;
+
+t4= (){
+    test:=1;
+}

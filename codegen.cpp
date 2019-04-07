@@ -12,7 +12,19 @@ llvm::Value* BlockNode::codegen(CompileContext *cc){
 
 llvm::Function* FunctionNode::codegen(CompileContext *cc){
 
-    llvm::Function *f = fs->codegen(cc);
+    llvm::Function *f;
+
+    if(declar){
+        f = fs->codegen(cc);
+    } else {
+        f = cc->module->getFunction(fs->name.c_str());
+        if(!f){
+            llvm::errs() << "Attempt to define function without declaration, have you forgotten a : ?\n At function " << fs->name << "\n";
+            exit(1);
+            return nullptr;
+        }
+    }
+    
 
     llvm::BasicBlock *bblock = llvm::BasicBlock::Create(cc->context, "entry", f);
     cc->builder->SetInsertPoint(bblock);

@@ -105,8 +105,8 @@ class BlockNode: public Node{
 };
 
 class FunctionSignature: public StatementNode{
-    std::string name;
     public:
+    std::string name;
     TypeNode *type;
     FunctionSignature(std::string name, TypeNode *type){
         this->name = name;
@@ -120,9 +120,11 @@ class FunctionNode: public StatementNode{
     public:
     BlockNode *body;
     FunctionSignature *fs;
-    FunctionNode(BlockNode *body, FunctionSignature *fs) {
+    bool declar;
+    FunctionNode(BlockNode *body, FunctionSignature *fs, bool declar) {
         this->body = body;
         this->fs = fs;
+        this->declar = declar;
     }
     virtual llvm::Function* codegen(CompileContext *cc);
 };

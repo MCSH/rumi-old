@@ -55,7 +55,8 @@ top_level_code
     | function_declaration{$$=$1;};
 
 function_definition
-    : ID DEFINE_AND_ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6));};
+    : ID DEFINE_AND_ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6), true);}
+    | ID ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6), false);};
 
 function_declaration
     : ID DEFINE '(' params ')' return_type ';' {$$=new FunctionSignature(*$1, $6);};
