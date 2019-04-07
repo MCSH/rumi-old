@@ -20,7 +20,6 @@ BlockNode *programBlock;
     FunctionNode *function;
     ExprNode *expr;
     TypeNode *type;
-    OP  op;
 }
 
 %token<string> OCT DEC
