@@ -24,7 +24,41 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
             return nullptr;
         }
     }
-    
+
+    auto myType = fs->type->type;
+
+    bool is_void = myType->type==PrimTypes::VOID;
+
+    RetNode *p = NULL;
+    llvm::Value *last = NULL;
+    for(auto statement: body->statements){
+        if(p = dynamic_cast<RetNode *>(statement)){
+            // Check to see if their type matches.
+
+            if(is_void){
+                if(p->st){
+                    llvm::errs() << "uncompatible return type in function " << fs->name <<"\n";
+                    exit(1);
+                    return nullptr;
+                }
+            } else {
+
+                if(!p->st){
+                    llvm::errs() << "uncompatible return type in function " << fs->name <<"\n";
+                    exit(1);
+                    return nullptr;
+                }
+
+                auto retType = p->st->resolveType(cc);
+
+                if(!myType->compatible(retType)){
+                    llvm::errs() << "Uncompatible return type in function " << fs->name <<"\n";
+                    exit(1);
+                    return nullptr;
+                } 
+            }
+        }
+    }
 
     llvm::BasicBlock *bblock = llvm::BasicBlock::Create(cc->context, "entry", f);
     cc->builder->SetInsertPoint(bblock);
