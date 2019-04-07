@@ -79,7 +79,7 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
             if(this->type){
                 // We have a type, and an expression.
                 // TODO use a better, compatible checking method!
-                if(this->type->type == tmp){
+                if(this->type->type->compatible(tmp)){
                     //Great, no problem
                     cc->setType(name, tmp);
                 } else{
@@ -129,7 +129,7 @@ llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
     return cc->builder->CreateLoad(v, "readtmp");
 }
 
-Types VariableLoadNode::resolveType(CompileContext *cc){
+Types *VariableLoadNode::resolveType(CompileContext *cc){
     return cc->getType(name);
 }
 
@@ -147,17 +147,17 @@ llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
     return cc->builder->CreateCall(calleeF, argsV, "calltmp");
 }
 
-Types FunctionCallnode::resolveType(CompileContext *cc){
+Types *FunctionCallnode::resolveType(CompileContext *cc){
     return cc->getType(name);
 }
 
 llvm::Type* TypeNode::codegen(CompileContext *cc){
-    switch(type){
-        case Types::INT:
+    switch(type->type){
+        case PrimTypes::INT:
             return llvm::Type::getInt64Ty(cc->context);
-        case Types::STRING:
+        case PrimTypes::STRING:
             return llvm::Type::getDoubleTy(cc->context); // TODO
-        case Types::VOID:
+        case PrimTypes::VOID:
             return llvm::Type::getVoidTy(cc->context);
     }
 }
@@ -185,7 +185,7 @@ llvm::Value* OpExprNode::codegen(CompileContext *cc){
     return llvm::BinaryOperator::Create(instr, lval, rval, "", cc->getBlock()->bblock);
 }
 
-Types OpExprNode::resolveType(CompileContext *cc){
+Types *OpExprNode::resolveType(CompileContext *cc){
     // TODO improve later!
     return LHS->resolveType(cc);
 }

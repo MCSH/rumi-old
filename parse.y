@@ -65,7 +65,7 @@ function_declaration
     : ID DEFINE '(' params ')' return_type ';' {$$=new FunctionSignature(*$1, $6);};
 
 return_type
-    : empty {$$=new TypeNode(Types::VOID);}// Void
+    : empty {$$=new TypeNode(new Types(PrimTypes::VOID));}// Void
     | RESULTS_IN type {$$=$2;};
 
 params
@@ -80,12 +80,12 @@ param_list
     | param;
 
 type
-    : STRING {$$=new TypeNode(Types::STRING);}
-    | INT {$$=new TypeNode(Types::INT);}
+    : STRING {$$=new TypeNode(new Types(PrimTypes::STRING));}
+    | INT {$$=new TypeNode(new Types(PrimTypes::INT));}
     | array_type;
 
 array_type
-    : '[' ']' type {$$=new TypeNode(Types::STRING);}; // TODO
+    : '[' ']' type {$$=new TypeNode(new Types(PrimTypes::STRING));}; // TODO
 
 empty:;
 

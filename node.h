@@ -17,16 +17,30 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
 
-enum class Types{
+enum class PrimTypes{
     INT,
     STRING,
     VOID
 };
 
+class Types{
+    public:
+    PrimTypes type;
+
+    Types(PrimTypes t){
+        type = t;
+    }
+
+    bool compatible(Types *that){
+        return this->type==that->type;
+    }
+};
+
+
 class BlockContext{
     public:
         std::map<std::string, llvm::AllocaInst *> namedValues; // Maybe should be Value*?
-        std::map<std::string, Types> namedTypes;
+        std::map<std::string, Types*> namedTypes;
         llvm::BasicBlock *bblock;
 
         BlockContext(llvm::BasicBlock *bb){
@@ -57,7 +71,7 @@ class CompileContext{
             return global;
         }
 
-        Types getType(std::string name){
+        Types* getType(std::string name){
             for(std::vector<BlockContext *>::reverse_iterator i=block.rbegin(); i != block.rend(); i++){
                 auto nt = (*i)->namedTypes;
                 auto p = nt.find(name);
@@ -68,7 +82,7 @@ class CompileContext{
             return global->namedTypes[name];
         }
 
-        void setType(std::string name, Types type){
+        void setType(std::string name, Types *type){
             if(hasBlock()){
                 block.back()->namedTypes[name] = type;
                 return;
@@ -86,8 +100,8 @@ class Node{
 
 class TypeNode{
     public:
-    Types type;
-    TypeNode(Types type){
+    Types* type;
+    TypeNode(Types *type){
         this->type = type;
     }
     virtual llvm::Type* codegen(CompileContext *cc);
@@ -132,7 +146,7 @@ class FunctionNode: public StatementNode{
 class ExprNode: public StatementNode{
     public:
     virtual llvm::Value* codegen(CompileContext *cc)= 0;
-    virtual Types resolveType(CompileContext *cc) = 0;
+    virtual Types* resolveType(CompileContext *cc) = 0;
 };
 
 class IntNode: public ExprNode{
@@ -141,8 +155,8 @@ class IntNode: public ExprNode{
         IntNode(int value): value(value){}
 
         virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types resolveType(CompileContext *cc){
-            return Types::INT;
+        virtual Types* resolveType(CompileContext *cc){
+            return new Types(PrimTypes::INT);
         }
 };
 
@@ -191,7 +205,7 @@ class VariableLoadNode: public ExprNode{
             this->name = name;
         }
         virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types resolveType(CompileContext *cc);
+        virtual Types* resolveType(CompileContext *cc);
 };
 
 class FunctionCallnode: public ExprNode{
@@ -203,7 +217,7 @@ class FunctionCallnode: public ExprNode{
             this->name = name;
         }
         virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types resolveType(CompileContext *cc);
+        virtual Types* resolveType(CompileContext *cc);
 };
 
 enum class OP{
@@ -225,5 +239,5 @@ class OpExprNode: public ExprNode{
         }
         
         virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types resolveType(CompileContext *cc);
+        virtual Types* resolveType(CompileContext *cc);
 };
