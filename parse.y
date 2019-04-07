@@ -24,7 +24,8 @@ BlockNode *programBlock;
 
 %token<string> OCT DEC
 %token<string> ID
-%token<string> INT STRING
+%token INT INT1 INT8 INT16 INT32 INT64 INT128
+%token STRING
 %token DEFINE_AND_ASSIGN
 %token RESULTS_IN
 %token RETURN
@@ -82,6 +83,12 @@ param_list
 type
     : STRING {$$=new TypeNode(new Types(PrimTypes::STRING));}
     | INT {$$=new TypeNode(new Types(PrimTypes::INT));}
+    | INT1 {$$=new TypeNode(new Types(PrimTypes::INT, 1));}
+    | INT8 {$$=new TypeNode(new Types(PrimTypes::INT, 8));}
+    | INT16 {$$=new TypeNode(new Types(PrimTypes::INT, 16));}
+    | INT32 {$$=new TypeNode(new Types(PrimTypes::INT, 32));}
+    | INT64 {$$=new TypeNode(new Types(PrimTypes::INT, 64));}
+    | INT128 {$$=new TypeNode(new Types(PrimTypes::INT, 128));}
     | array_type;
 
 array_type

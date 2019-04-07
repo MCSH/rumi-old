@@ -26,9 +26,16 @@ enum class PrimTypes{
 class Types{
     public:
     PrimTypes type;
+    int size;
 
     Types(PrimTypes t){
         type = t;
+        size = 0;
+    }
+
+    Types(PrimTypes t, int s){
+        type = t;
+        size = s;
     }
 
     bool compatible(Types *that){

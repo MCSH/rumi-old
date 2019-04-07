@@ -16,7 +16,12 @@ int comment_nesting = 0;
 
 %%
 
-
+"u1" {return INT1;}
+"u8"   {return INT8;}
+"u16"   {return INT16;}
+"u32"   {return INT32;}
+"u64"   {return INT64;}
+"u128"   {return INT128;}
 "int"   {return INT;}
 "string"   {return STRING;}
 "return"        {return RETURN;}

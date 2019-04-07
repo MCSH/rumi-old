@@ -52,6 +52,7 @@ llvm::Function* FunctionSignature::codegen(CompileContext *cc){
 }
 
 llvm::Value* IntNode::codegen(CompileContext *cc){
+    // TODO is it 64?
     return llvm::ConstantInt::get(llvm::Type::getInt64Ty(cc->context), value, true);
 }
 
@@ -63,34 +64,21 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
     // TODO check global!
     if(cc->hasBlock()){
 
-        auto bblock = cc->getBlock()->bblock;
 
-        llvm::IRBuilder<> TmpB(bblock, bblock->begin());
-
-        llvm::AllocaInst *alloc = TmpB.CreateAlloca(llvm::Type::getInt64Ty(cc->context), 0, name.c_str()); // TODO Why not cc->builder ? 
-
-        cc->getBlock()->namedValues[name] = alloc;
 
         if(expr){
-            VariableAssignNode van(name, expr);
-            van.codegen(cc);
             auto tmp = expr->resolveType(cc);
 
             if(this->type){
                 // We have a type, and an expression.
-                // TODO use a better, compatible checking method!
-                if(this->type->type->compatible(tmp)){
-                    //Great, no problem
-                    cc->setType(name, tmp);
-                } else{
+                if(!(this->type->type->compatible(tmp))){
                     llvm::errs() << "Assigned expr not compatible with assigned type. variable name: " << name << "\n";
                     exit(1);
                     return nullptr;
                 }
             } else {
                 // We don't have a type, so our type is the expr assigned to us.
-                cc->setType(name, tmp);
-                return alloc;
+                type = new TypeNode(tmp);
             }
         } else {
             if(!this->type){
@@ -98,9 +86,24 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
                 exit(1);
                 return nullptr;
             }
-            cc->setType(name, this->type->type);
-            return alloc;
         }
+
+        auto bblock = cc->getBlock()->bblock;
+        llvm::IRBuilder<> TmpB(bblock, bblock->begin());
+
+        auto t = this->type->codegen(cc);
+        llvm::AllocaInst *alloc = TmpB.CreateAlloca(t, 0, name.c_str());
+
+        cc->getBlock()->namedValues[name] = alloc;
+        cc->setType(name, this->type->type);
+
+        if(expr){
+            VariableAssignNode van(name, expr);
+            van.codegen(cc);
+        }
+
+        return alloc;
+
     }
     return nullptr;
 }
@@ -114,7 +117,7 @@ llvm::Value* VariableAssignNode::codegen(CompileContext *cc){
     }
 
     llvm::Value *v = expr ->codegen(cc);
-    return cc->builder->CreateStore(v, alloc); // TODO tmpb or cc->builder?
+    return cc->builder->CreateStore(v, alloc);
 }
 
 llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
@@ -154,7 +157,23 @@ Types *FunctionCallnode::resolveType(CompileContext *cc){
 llvm::Type* TypeNode::codegen(CompileContext *cc){
     switch(type->type){
         case PrimTypes::INT:
-            return llvm::Type::getInt64Ty(cc->context);
+            if(!type->size) 
+                // TODO return c int, for now 64
+                return llvm::Type::getInt64Ty(cc->context);
+            switch(type->size){
+                case 1:
+                    return llvm::Type::getInt1Ty(cc->context);
+                case 8:
+                    return llvm::Type::getInt8Ty(cc->context);
+                case 16:
+                    return llvm::Type::getInt16Ty(cc->context);
+                case 32:
+                    return llvm::Type::getInt32Ty(cc->context);
+                case 64:
+                    return llvm::Type::getInt64Ty(cc->context);
+                case 128:
+                    return llvm::Type::getInt128Ty(cc->context);
+            }
         case PrimTypes::STRING:
             return llvm::Type::getDoubleTy(cc->context); // TODO
         case PrimTypes::VOID:

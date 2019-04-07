@@ -16,13 +16,15 @@ This is a comment man, don't worry
 
 // Line comments work too, aint it cool?
 main := (argc: int, argv: []string) -> int{
-    tok : int = 1;
     ans := test();
     ans = ans + 1;
     return ans;
-    hey := 1;
-    return ans;
-    took := t4();
+
+    Num : u32 = 123;
+
+    Ok : u128 = 1230;
+
+    Yo : u128;
 }
 
 t2 : ();
