@@ -5,7 +5,16 @@ test :=() -> int{
 
 t4: ();
 
+/*
+This is a comment man, don't worry
+*/
 
+/* You know what would be cool?
+/* nested comments!
+*/ C would not understand this, hahaha!*/
+
+
+// Line comments work too, aint it cool?
 main := (argc: int, argv: []string) -> int{
     ans := test();
     ans = ans + 1;

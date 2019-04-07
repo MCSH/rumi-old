@@ -8,9 +8,14 @@ ALPHA   [a-zA-Z_]
 %{
 #include <string>
 #include "parse.hpp"
+int comment_nesting = 0;
 %}
 
+%x COMMENT
+%x LINE_COMMENT
+
 %%
+
 
 "int"   {return INT;}
 "string"   {return STRING;}
@@ -37,6 +42,20 @@ ALPHA   [a-zA-Z_]
 {ALPHA}{ALPHANUMERIC}*  {yylval.string = new std::string(yytext); return ID;}
 
 {WHITESPACE}+      {/*Discard */}
+
+"/*"    {BEGIN(COMMENT);}
+<COMMENT>{
+   "/*" {++comment_nesting;} 
+   "*"+"/"      {if(comment_nesting) --comment_nesting;
+                 else BEGIN(INITIAL);}
+    \n  {}
+    .   {}
+}
+
+"//"    {BEGIN(LINE_COMMENT);}
+<LINE_COMMENT>\n        {BEGIN(INITIAL);}
+<LINE_COMMENT>. {}
+
 
 .       {printf("I didn't understand %s\n", yytext);}
 %%
