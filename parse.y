@@ -142,7 +142,9 @@ arg_list
 arg: expr;
 
 return_stmt
-    : RETURN expr ';' { $$ = new RetNode($2); };
+    : RETURN expr ';' { $$ = new RetNode($2); }
+    | RETURN ';' {$$ = new RetNode(nullptr);}
+    ;
 
 value
     : ID { $$ = new VariableLoadNode(*$1);} // TODO

@@ -57,7 +57,11 @@ llvm::Value* IntNode::codegen(CompileContext *cc){
 }
 
 llvm::Value* RetNode::codegen(CompileContext *cc){
-    return cc->builder->CreateRet(st->codegen(cc));
+    if(st){
+        return cc->builder->CreateRet(st->codegen(cc));
+    }
+
+    return cc->builder->CreateRetVoid();
 }
 
 llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
