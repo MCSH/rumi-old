@@ -28,6 +28,9 @@ ALPHA   [a-zA-Z_]
 ","     {return ',';}
 ";"     {return ';';}
 "+"     {return '+';}
+"-"     {return '-';}
+"*"     {return '*';}
+"/"     {return '/';}
 
 {NONZERODIGIT}{DIGIT}*        {yylval.string=new std::string(yytext); return DEC;}
 "0"{OCTDIGIT}*  {yylval.string = new std::string(yytext); return OCT;}

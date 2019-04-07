@@ -149,7 +149,19 @@ llvm::Value* OpExprNode::codegen(CompileContext *cc){
         case OP::PLUS:
             instr = llvm::Instruction::Add;
             break;
+        case OP::SUB:
+            instr = llvm::Instruction::Sub;
+            break;
+        case OP::MULT:
+            instr = llvm::Instruction::Mul;
+            break;
+        case OP::DIVIDE:
+            instr = llvm::Instruction::SDiv;
+            break;
     }
+
+    // TODO improve later!
+    type = LHS->type;
 
     return llvm::BinaryOperator::Create(instr, lval, rval, "", cc->getBlock()->bblock);
 }

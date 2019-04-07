@@ -38,9 +38,9 @@ BlockNode *programBlock;
 %type<expr> value expr function_call op_expr
 %type<block> code
 %type<type> return_type type array_type
-%type<op> op
 
-%left '+'
+%left '+' '-'
+%left '*' '/'
 
 
 %start program
@@ -108,15 +108,16 @@ variable_decl
     : ID DEFINE_AND_ASSIGN expr ';' {$$ = new VariableDeclNode(*$1, $3, nullptr);};
 
 expr
-    : value
-    | function_call
-    | op_expr;
+    : function_call
+    | op_expr
+    | value;
 
 op_expr
-    : expr op expr{$$=new OpExprNode($1,$2,$3);};
-
-op
-    : '+'{$$=OP::PLUS;};
+    : expr '+' expr{$$=new OpExprNode($1,OP::PLUS,$3);}
+    | expr '-' expr{$$=new OpExprNode($1,OP::SUB,$3);}
+    | expr '*' expr{$$=new OpExprNode($1,OP::MULT,$3);}
+    | expr '/' expr{$$=new OpExprNode($1,OP::DIVIDE,$3);}
+    ;
 
 function_call
     : ID '(' args ')' {$$=new FunctionCallnode(*$1);};

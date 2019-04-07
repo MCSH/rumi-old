@@ -206,7 +206,10 @@ class FunctionCallnode: public ExprNode{
 };
 
 enum class OP{
-    PLUS
+    PLUS,
+    SUB,
+    MULT,
+    DIVIDE
 };
 
 class OpExprNode: public ExprNode{
