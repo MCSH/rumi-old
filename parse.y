@@ -20,6 +20,7 @@ BlockNode *programBlock;
     FunctionNode *function;
     ExprNode *expr;
     TypeNode *type;
+    OP  op;
 }
 
 %token<string> OCT DEC
@@ -34,9 +35,12 @@ BlockNode *programBlock;
 %type<program> program top_level
 %type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration
 %type<function> function_definition
-%type<expr> value expr function_call
+%type<expr> value expr function_call op_expr
 %type<block> code
 %type<type> return_type type array_type
+%type<op> op
+
+%left '+'
 
 
 %start program
@@ -105,7 +109,14 @@ variable_decl
 
 expr
     : value
-    | function_call;
+    | function_call
+    | op_expr;
+
+op_expr
+    : expr op expr{$$=new OpExprNode($1,$2,$3);};
+
+op
+    : '+'{$$=OP::PLUS;};
 
 function_call
     : ID '(' args ')' {$$=new FunctionCallnode(*$1);};

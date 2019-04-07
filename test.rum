@@ -1,6 +1,6 @@
 
 test :=() -> int{
-    return 2;
+    return 2+1;
 }
 
 t4: ();
@@ -8,6 +8,7 @@ t4: ();
 
 main := (argc: int, argv: []string) -> int{
     ans := test();
+    ans = ans + 1;
     return ans;
     hey := 1;
     return ans;
@@ -20,4 +21,5 @@ t3: ()-> int;
 
 t4= (){
     test:=1;
+    test = test + 1;
 }

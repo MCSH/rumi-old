@@ -204,3 +204,21 @@ class FunctionCallnode: public ExprNode{
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
+
+enum class OP{
+    PLUS
+};
+
+class OpExprNode: public ExprNode{
+    public:
+        ExprNode *LHS, *RHS;
+        OP op;
+
+        OpExprNode(ExprNode *LHS, OP op, ExprNode *RHS){
+            this->LHS = LHS;
+            this->RHS = RHS;
+            this->op = op;
+        }
+        
+        virtual llvm::Value* codegen(CompileContext *cc);
+};

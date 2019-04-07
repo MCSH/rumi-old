@@ -139,3 +139,17 @@ llvm::Type* TypeNode::codegen(CompileContext *cc){
             return llvm::Type::getVoidTy(cc->context);
     }
 }
+
+llvm::Value* OpExprNode::codegen(CompileContext *cc){
+    llvm::Value *lval = LHS->codegen(cc);
+    llvm::Value *rval = RHS->codegen(cc);
+    llvm::Instruction::BinaryOps instr;
+
+    switch(op){
+        case OP::PLUS:
+            instr = llvm::Instruction::Add;
+            break;
+    }
+
+    return llvm::BinaryOperator::Create(instr, lval, rval, "", cc->getBlock()->bblock);
+}
