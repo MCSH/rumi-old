@@ -71,18 +71,36 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
 
         cc->getBlock()->namedValues[name] = alloc;
 
-        // TODO not needed if no assignment
-
         if(expr){
             VariableAssignNode van(name, expr);
             van.codegen(cc);
-            type = expr->type;
+            auto tmp = expr->resolveType(cc);
+
+            if(this->type){
+                // We have a type, and an expression.
+                // TODO use a better, compatible checking method!
+                if(this->type->type == tmp){
+                    //Great, no problem
+                    cc->setType(name, tmp);
+                } else{
+                    llvm::errs() << "Assigned expr not compatible with assigned type. variable name: " << name << "\n";
+                    exit(1);
+                    return nullptr;
+                }
+            } else {
+                // We don't have a type, so our type is the expr assigned to us.
+                cc->setType(name, tmp);
+                return alloc;
+            }
+        } else {
+            if(!this->type){
+                llvm::errs() << "We need either a type or an expr. variable name: " << name << "\n";
+                exit(1);
+                return nullptr;
+            }
+            cc->setType(name, this->type->type);
+            return alloc;
         }
-
-        cc->setType(name, this->type->type);
-
-        return alloc;
-
     }
     return nullptr;
 }
@@ -108,9 +126,11 @@ llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
         return nullptr;
     }
 
-    type = new TypeNode(cc->getType(name));
-
     return cc->builder->CreateLoad(v, "readtmp");
+}
+
+Types VariableLoadNode::resolveType(CompileContext *cc){
+    return cc->getType(name);
 }
 
 llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
@@ -121,12 +141,14 @@ llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
         return nullptr;
     }
 
-    type = new TypeNode(cc->getType(name));
-
     std::vector<llvm::Value *> argsV;
 
 
     return cc->builder->CreateCall(calleeF, argsV, "calltmp");
+}
+
+Types FunctionCallnode::resolveType(CompileContext *cc){
+    return cc->getType(name);
 }
 
 llvm::Type* TypeNode::codegen(CompileContext *cc){
@@ -160,8 +182,10 @@ llvm::Value* OpExprNode::codegen(CompileContext *cc){
             break;
     }
 
-    // TODO improve later!
-    type = LHS->type;
-
     return llvm::BinaryOperator::Create(instr, lval, rval, "", cc->getBlock()->bblock);
+}
+
+Types OpExprNode::resolveType(CompileContext *cc){
+    // TODO improve later!
+    return LHS->resolveType(cc);
 }

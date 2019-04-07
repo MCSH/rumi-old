@@ -131,18 +131,19 @@ class FunctionNode: public StatementNode{
 
 class ExprNode: public StatementNode{
     public:
-    TypeNode *type;
     virtual llvm::Value* codegen(CompileContext *cc)= 0;
+    virtual Types resolveType(CompileContext *cc) = 0;
 };
 
 class IntNode: public ExprNode{
     public:
         int value;
-        IntNode(int value): value(value){
-            type = new TypeNode(Types::INT);
-        }
+        IntNode(int value): value(value){}
 
         virtual llvm::Value* codegen(CompileContext *cc);
+        virtual Types resolveType(CompileContext *cc){
+            return Types::INT;
+        }
 };
 
 class RetNode: public StatementNode{
@@ -188,9 +189,9 @@ class VariableLoadNode: public ExprNode{
 
         VariableLoadNode(std::string name){
             this->name = name;
-            // TODO fill in type
         }
         virtual llvm::Value* codegen(CompileContext *cc);
+        virtual Types resolveType(CompileContext *cc);
 };
 
 class FunctionCallnode: public ExprNode{
@@ -200,9 +201,9 @@ class FunctionCallnode: public ExprNode{
 
         FunctionCallnode(std::string name){
             this->name = name;
-            // TODO fill in type
         }
         virtual llvm::Value* codegen(CompileContext *cc);
+        virtual Types resolveType(CompileContext *cc);
 };
 
 enum class OP{
@@ -224,4 +225,5 @@ class OpExprNode: public ExprNode{
         }
         
         virtual llvm::Value* codegen(CompileContext *cc);
+        virtual Types resolveType(CompileContext *cc);
 };

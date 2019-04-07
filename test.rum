@@ -16,6 +16,7 @@ This is a comment man, don't worry
 
 // Line comments work too, aint it cool?
 main := (argc: int, argv: []string) -> int{
+    tok : int = 1;
     ans := test();
     ans = ans + 1;
     return ans;
