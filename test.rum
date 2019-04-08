@@ -3,8 +3,6 @@ test :=(i: int) -> int{
     return i+1;
 }
 
-t4: ();
-
 /*
 This is a comment man, don't worry
 */
@@ -16,18 +14,6 @@ This is a comment man, don't worry
 
 // Line comments work too, aint it cool?
 main := (argc: int, argv: []string) -> int{
-    ans := test();
-    ans = ans + 1;
-    return 2;
-
-    tmp := test();
-    return tmp;
-}
-
-t2 : ();
-
-t3: ()-> int;
-
-t4= (){
-    test := 1+2*3/4 -5*2;
+    ans := test(41);
+    return ans;
 }

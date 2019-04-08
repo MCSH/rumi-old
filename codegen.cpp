@@ -37,7 +37,6 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
     auto nv = cc->getBlock()->namedValues;
     if(fs->params)
     for(auto &arg: *fs->params){
-        printf("Defining variable %s\n", arg->name.c_str());
         cc->setType(arg->name, arg->type->type);
         llvm::AllocaInst *alloc = TmpB.CreateAlloca(arg->type->codegen(cc), 0, arg->name);
         nv[arg->name] = alloc;
