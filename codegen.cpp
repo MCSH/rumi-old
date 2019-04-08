@@ -136,7 +136,7 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
                 }
             } else {
                 // We don't have a type, so our type is the expr assigned to us.
-                type = new TypeNode(tmp);
+                type = new TypeNode(tmp); // TODO: problematic.
             }
         } else {
             if(!this->type){
@@ -218,6 +218,12 @@ Types *FunctionCallNode::resolveType(CompileContext *cc){
 }
 
 llvm::Type* TypeNode::codegen(CompileContext *cc){
+    ArrayTypes *ar;
+    if(ar = dynamic_cast<ArrayTypes *>(type)){
+        return llvm::PointerType::getUnqual( // TODO?
+            (new TypeNode(ar->base))->codegen(cc)
+                );
+    }
     switch(type->type){
         case PrimTypes::INT:
             if(!type->size) 
@@ -238,10 +244,7 @@ llvm::Type* TypeNode::codegen(CompileContext *cc){
                     return llvm::Type::getInt128Ty(cc->context);
             }
         case PrimTypes::STRING:
-            return llvm::PointerType::getUnqual(
-                    llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cc->context))
-                    )
-            ; // TODO this is []string
+            return llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cc->context));
         case PrimTypes::VOID:
             return llvm::Type::getVoidTy(cc->context);
     }

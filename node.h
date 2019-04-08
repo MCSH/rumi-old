@@ -28,22 +28,44 @@ class Types{
     public:
     PrimTypes type;
     int size;
+    bool is_prim;
+
+    Types(){}
 
     Types(PrimTypes t){
         type = t;
         size = 0;
+        is_prim = true;
     }
 
     Types(PrimTypes t, int s){
         type = t;
         size = s;
+        is_prim = false;
     }
 
-    bool compatible(Types *that){
+    virtual bool compatible(Types *that){
         // if(!that) // TODO I don't like this, but just for now.
             // return false;
         return this->type==that->type;
     }
+};
+
+class ArrayTypes: public Types{
+    public:
+        Types *base;
+
+        ArrayTypes(Types *base){
+            this->base = base;
+            is_prim = false;
+        }
+
+        bool compatible(Types *that){
+            ArrayTypes *t = dynamic_cast<ArrayTypes *>(that);
+            if(!t)
+                return false;
+            return base->compatible(t->base);
+        };
 };
 
 

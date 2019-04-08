@@ -100,7 +100,7 @@ type
     | array_type;
 
 array_type
-    : '[' ']' type {$$=new TypeNode(new Types(PrimTypes::STRING));}; // TODO
+    : '[' ']' type {$$=new TypeNode(new ArrayTypes($3->type));};
 
 empty:;
 
