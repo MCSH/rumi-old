@@ -13,7 +13,7 @@ This is a comment man, don't worry
 
 
 // Line comments work too, aint it cool?
-main := (argc: int, argv: []string) -> int{
+main := (argc: u32, argv: []string) -> int{
     ans := test(41);
     return ans;
 }

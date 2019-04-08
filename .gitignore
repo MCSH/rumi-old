@@ -2,3 +2,6 @@ lex.cpp
 rum
 parse.cpp
 parse.hpp
+test.ll
+out.o
+a.out

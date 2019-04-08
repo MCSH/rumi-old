@@ -34,16 +34,15 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
     llvm::IRBuilder<> TmpB(bblock, bblock->begin());
 
     // TODO optimize
-    auto nv = cc->getBlock()->namedValues;
     if(fs->params)
     for(auto &arg: *fs->params){
         cc->setType(arg->name, arg->type->type);
         llvm::AllocaInst *alloc = TmpB.CreateAlloca(arg->type->codegen(cc), 0, arg->name);
-        nv[arg->name] = alloc;
+        cc->getBlock()->namedValues[arg->name] = alloc;
     }
 
     for(auto &Arg: f->args()){
-        cc->builder->CreateStore(&Arg, nv[Arg.getName()]);
+        cc->builder->CreateStore(&Arg, cc->getBlock()->namedValues[Arg.getName()]);
     }
 
     body -> codegen(cc);
@@ -239,7 +238,10 @@ llvm::Type* TypeNode::codegen(CompileContext *cc){
                     return llvm::Type::getInt128Ty(cc->context);
             }
         case PrimTypes::STRING:
-            return llvm::Type::getDoubleTy(cc->context); // TODO
+            return llvm::PointerType::getUnqual(
+                    llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cc->context))
+                    )
+            ; // TODO this is []string
         case PrimTypes::VOID:
             return llvm::Type::getVoidTy(cc->context);
     }
