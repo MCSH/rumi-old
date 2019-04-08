@@ -127,31 +127,6 @@ class BlockNode: public Node{
         virtual llvm::Value* codegen(CompileContext *cc);
 };
 
-class FunctionSignature: public StatementNode{
-    public:
-    std::string name;
-    TypeNode *type;
-    FunctionSignature(std::string name, TypeNode *type){
-        this->name = name;
-        this->type = type;
-    }
-
-    virtual llvm::Function* codegen(CompileContext *cc);
-};
-
-class FunctionNode: public StatementNode{
-    public:
-    BlockNode *body;
-    FunctionSignature *fs;
-    bool declar;
-    FunctionNode(BlockNode *body, FunctionSignature *fs, bool declar) {
-        this->body = body;
-        this->fs = fs;
-        this->declar = declar;
-    }
-    virtual llvm::Function* codegen(CompileContext *cc);
-};
-
 class ExprNode: public StatementNode{
     public:
     virtual llvm::Value* codegen(CompileContext *cc)= 0;
@@ -250,4 +225,31 @@ class OpExprNode: public ExprNode{
         
         virtual llvm::Value* codegen(CompileContext *cc);
         virtual Types* resolveType(CompileContext *cc);
+};
+
+class FunctionSignature: public StatementNode{
+    public:
+    std::string name;
+    TypeNode *type;
+    std::vector<VariableDeclNode *> *params;
+    FunctionSignature(std::string name, TypeNode *type, std::vector<VariableDeclNode*> *params){
+        this->name = name;
+        this->type = type;
+        this->params = params;
+    }
+
+    virtual llvm::Function* codegen(CompileContext *cc);
+};
+
+class FunctionNode: public StatementNode{
+    public:
+    BlockNode *body;
+    FunctionSignature *fs;
+    bool declar;
+    FunctionNode(BlockNode *body, FunctionSignature *fs, bool declar) {
+        this->body = body;
+        this->fs = fs;
+        this->declar = declar;
+    }
+    virtual llvm::Function* codegen(CompileContext *cc);
 };

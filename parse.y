@@ -20,6 +20,8 @@ BlockNode *programBlock;
     FunctionNode *function;
     ExprNode *expr;
     TypeNode *type;
+    VariableDeclNode *var_decl;
+    std::vector<VariableDeclNode*> *params;
     std::vector<ExprNode *> *args;
 }
 
@@ -42,6 +44,9 @@ BlockNode *programBlock;
 
 %type<args> args arg_list
 
+%type<var_decl> param
+%type<params> params param_list
+
 %left '+' '-'
 %left '*' '/'
 
@@ -62,11 +67,11 @@ top_level_code
     | function_declaration{$$=$1;};
 
 function_definition
-    : ID DEFINE_AND_ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6), true);}
-    | ID ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6), false);};
+    : ID DEFINE_AND_ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6, $4), true);}
+    | ID ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6, $4), false);};
 
 function_declaration
-    : ID DEFINE '(' params ')' return_type ';' {$$=new FunctionSignature(*$1, $6);};
+    : ID DEFINE '(' params ')' return_type ';' {$$=new FunctionSignature(*$1, $6, $4);};
 
 return_type
     : empty {$$=new TypeNode(new Types(PrimTypes::VOID));}// Void
@@ -74,14 +79,14 @@ return_type
 
 params
     : param_list
-    | empty;
+    | empty {$$=nullptr;};
 
 param
-    : ID DEFINE type;
+    : ID DEFINE type{$$=new VariableDeclNode(*$1, nullptr, $3);};
 
 param_list
-    : param ',' param_list
-    | param;
+    : param_list ',' param {$1->push_back($3); $$=$1;}
+    | param {$$=new std::vector<VariableDeclNode *>(); $$->push_back($1);};
 
 type
     : STRING {$$=new TypeNode(new Types(PrimTypes::STRING));}

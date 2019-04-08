@@ -31,6 +31,22 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
 
     cc->block.push_back(new BlockContext(bblock));
 
+    llvm::IRBuilder<> TmpB(bblock, bblock->begin());
+
+    // TODO optimize
+    auto nv = cc->getBlock()->namedValues;
+    if(fs->params)
+    for(auto &arg: *fs->params){
+        printf("Defining variable %s\n", arg->name.c_str());
+        cc->setType(arg->name, arg->type->type);
+        llvm::AllocaInst *alloc = TmpB.CreateAlloca(arg->type->codegen(cc), 0, arg->name);
+        nv[arg->name] = alloc;
+    }
+
+    for(auto &Arg: f->args()){
+        cc->builder->CreateStore(&Arg, nv[Arg.getName()]);
+    }
+
     body -> codegen(cc);
 
     auto myType = fs->type->type;
@@ -75,12 +91,23 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
 
 llvm::Function* FunctionSignature::codegen(CompileContext *cc){
     std::vector<llvm::Type*> args;
+    if(params)
+        for(auto arg: *params){
+            args.push_back(arg->type->codegen(cc));
+        }
     auto type = this->type->codegen(cc);
 
     cc->setType(name, this->type->type);
 
     llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
-    return llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
+
+    auto F = llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
+
+    unsigned idx = 0;
+    for(auto &arg: F->args())
+        arg.setName((*params)[idx++]->name);
+
+    return F;
 }
 
 llvm::Value* IntNode::codegen(CompileContext *cc){
@@ -99,9 +126,6 @@ llvm::Value* RetNode::codegen(CompileContext *cc){
 llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
     // TODO check global!
     if(cc->hasBlock()){
-
-
-
         if(expr){
             auto tmp = expr->resolveType(cc);
 
@@ -173,7 +197,6 @@ Types *VariableLoadNode::resolveType(CompileContext *cc){
 }
 
 llvm::Value* FunctionCallNode::codegen(CompileContext *cc){
-    // TODO args!
     llvm::Function *calleeF = cc->module->getFunction(name.c_str());
     if(!calleeF){
         llvm::errs() << "Undefined function " << name << "\n";

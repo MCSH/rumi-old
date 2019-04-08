@@ -1,6 +1,6 @@
 
-test :=() -> int{
-    return 2+1;
+test :=(i: int) -> int{
+    return i+1;
 }
 
 t4: ();
