@@ -25,10 +25,16 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
         }
     }
 
+
+    llvm::BasicBlock *bblock = llvm::BasicBlock::Create(cc->context, "entry", f);
+    cc->builder->SetInsertPoint(bblock);
+
+    cc->block.push_back(new BlockContext(bblock));
+
+    body -> codegen(cc);
+
     auto myType = fs->type->type;
-
     bool is_void = myType->type==PrimTypes::VOID;
-
     RetNode *p = NULL;
     llvm::Value *last = NULL;
     for(auto statement: body->statements){
@@ -60,15 +66,7 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
         }
     }
 
-    llvm::BasicBlock *bblock = llvm::BasicBlock::Create(cc->context, "entry", f);
-    cc->builder->SetInsertPoint(bblock);
-
-    cc->block.push_back(new BlockContext(bblock));
-
-    body -> codegen(cc);
-
     cc->block.pop_back();
-
 
     llvm::verifyFunction(*f);
 
@@ -174,7 +172,8 @@ Types *VariableLoadNode::resolveType(CompileContext *cc){
     return cc->getType(name);
 }
 
-llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
+llvm::Value* FunctionCallNode::codegen(CompileContext *cc){
+    // TODO args!
     llvm::Function *calleeF = cc->module->getFunction(name.c_str());
     if(!calleeF){
         llvm::errs() << "Undefined function " << name << "\n";
@@ -183,12 +182,17 @@ llvm::Value* FunctionCallnode::codegen(CompileContext *cc){
     }
 
     std::vector<llvm::Value *> argsV;
+    if(args)
+        for(auto arg: *args){
+            argsV.push_back(arg->codegen(cc));
+        }
 
 
     return cc->builder->CreateCall(calleeF, argsV, "calltmp");
 }
 
-Types *FunctionCallnode::resolveType(CompileContext *cc){
+Types *FunctionCallNode::resolveType(CompileContext *cc){
+    // TODO args!
     return cc->getType(name);
 }
 

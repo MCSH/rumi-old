@@ -39,6 +39,8 @@ class Types{
     }
 
     bool compatible(Types *that){
+        // if(!that) // TODO I don't like this, but just for now.
+            // return false;
         return this->type==that->type;
     }
 };
@@ -215,13 +217,14 @@ class VariableLoadNode: public ExprNode{
         virtual Types* resolveType(CompileContext *cc);
 };
 
-class FunctionCallnode: public ExprNode{
+class FunctionCallNode: public ExprNode{
     public:
         std::string name;
-        // TODO args
+        std::vector<ExprNode *> *args;
 
-        FunctionCallnode(std::string name){
+        FunctionCallNode(std::string name, std::vector<ExprNode *> *args){
             this->name = name;
+            this->args = args;
         }
         virtual llvm::Value* codegen(CompileContext *cc);
         virtual Types* resolveType(CompileContext *cc);

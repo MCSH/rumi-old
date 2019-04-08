@@ -18,13 +18,10 @@ This is a comment man, don't worry
 main := (argc: int, argv: []string) -> int{
     ans := test();
     ans = ans + 1;
-    return ans;
+    return 2;
 
-    Num : u32 = 123;
-
-    Ok : u128 = 1230;
-
-    Yo : u128;
+    tmp := test();
+    return tmp;
 }
 
 t2 : ();

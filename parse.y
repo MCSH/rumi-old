@@ -20,6 +20,7 @@ BlockNode *programBlock;
     FunctionNode *function;
     ExprNode *expr;
     TypeNode *type;
+    std::vector<ExprNode *> *args;
 }
 
 %token<string> OCT DEC
@@ -35,9 +36,11 @@ BlockNode *programBlock;
 %type<program> program top_level
 %type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration
 %type<function> function_definition
-%type<expr> value expr function_call op_expr
+%type<expr> value expr function_call op_expr arg
 %type<block> code
 %type<type> return_type type array_type
+
+%type<args> args arg_list
 
 %left '+' '-'
 %left '*' '/'
@@ -129,15 +132,15 @@ op_expr
     ;
 
 function_call
-    : ID '(' args ')' {$$=new FunctionCallnode(*$1);};
+    : ID '(' args ')' {$$=new FunctionCallNode(*$1, $3);};
 
 args
     : arg_list
-    | empty;
+    | empty {$$=nullptr;};
 
 arg_list
-    : arg ',' arg_list
-    | arg;
+    : arg_list ',' arg {$1->push_back($3); $$=$1;}
+    | arg {$$=new std::vector<ExprNode *>; $$->push_back($1);};
 
 arg: expr;
 
