@@ -4,7 +4,7 @@ OBJS = lex.cpp parse.cpp codegen.cpp compiler.cpp
 CC = clang++
 COMPILER_FLAGS = -w -g `llvm-config --cxxflags --ldflags --system-libs --libs core`
 
-all:	clean rum rumi
+all:	clean rum
 
 rum:	clean $(OBJS)
 	$(CC) $(COMPILER_FLAGS) $(OBJS) rum.cpp -o rum
