@@ -1,28 +1,14 @@
-#include <fstream>
 #include "llvm/Support/FileSystem.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/TargetRegistry.h"
+#include "compiler.h"
 
-int yyparse();
-extern "C" FILE *yyin;
-#include "node.h"
 
 int main(int argc, char **argv){
-    if(argc = 2){
-        char const *filename = argv[1];
-        yyin = fopen(filename, "r");
-        assert(yyin);
-    }
-    extern BlockNode *programBlock;
-    yyparse();
 
-    CompileContext *cc = new CompileContext();
-    cc -> module = llvm::make_unique<llvm::Module>("my cool jit", cc->context);
-
-    programBlock->codegen(cc);
-
+    auto cc = compile(argc, argv);
     cc->module->print(llvm::outs(), nullptr);
 
     // return 0; // TODO
@@ -53,7 +39,9 @@ int main(int argc, char **argv){
     cc-> module->setDataLayout(targetMachine->createDataLayout());
     cc-> module->setTargetTriple(targetTriple);
 
-
+    cc->module->materializeAll();
+        
+    cc->module->getNamedValue("main");
 
     auto output = "out.o";
     std::error_code EC;
