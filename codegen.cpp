@@ -314,3 +314,46 @@ llvm::Value* WhileNode::codegen(CompileContext *cc){
 
     return nullptr;
 }
+
+llvm::Value* IfNode::codegen(CompileContext *cc){
+    bool has_else = elseblock != nullptr;
+
+
+    llvm::Function *f = cc->builder->GetInsertBlock()->getParent();
+
+    llvm::BasicBlock
+        *ifBB = llvm::BasicBlock::Create(cc->context, "if", f),
+        *elseBB,
+        *mergeBB = llvm::BasicBlock::Create(cc->context, "ifcont");
+
+    if(has_else) 
+        elseBB = llvm::BasicBlock::Create(cc->context, "else");
+    else
+        elseBB = mergeBB;
+
+    llvm::Value *cond = expr->codegen(cc);
+    cond = cc->builder->CreateICmpNE(cond, llvm::ConstantInt::get(llvm::Type::getInt64Ty(cc->context), 0, false), "ifcond");
+    cc->builder->CreateCondBr(cond, ifBB, elseBB);
+
+    // IF Body
+    cc->block.push_back(new BlockContext(ifBB));
+    cc->builder->SetInsertPoint(ifBB);
+    ifblock->codegen(cc);
+    cc->builder->CreateBr(mergeBB);
+    cc->block.pop_back();
+
+    // Else Body
+    if(has_else){
+        cc->block.push_back(new BlockContext(elseBB));
+        f->getBasicBlockList().push_back(elseBB);
+        cc->builder->SetInsertPoint(elseBB);
+        elseblock->codegen(cc);
+        cc->builder->CreateBr(mergeBB);
+        cc->block.pop_back();
+    }
+
+    f->getBasicBlockList().push_back(mergeBB);
+    cc->builder->SetInsertPoint(mergeBB);
+
+    return nullptr;
+}

@@ -300,3 +300,16 @@ class WhileNode: public StatementNode{
 
     virtual llvm::Value* codegen(CompileContext *cc);
 };
+
+class IfNode: public StatementNode{
+    public:
+        ExprNode *expr;
+        BlockNode *ifblock, *elseblock;
+
+        IfNode(ExprNode *expr, BlockNode *i1, BlockNode *i2){
+            this->expr = expr;
+            ifblock = i1;
+            elseblock = i2;
+        }
+    virtual llvm::Value* codegen(CompileContext *cc);
+};

@@ -18,12 +18,13 @@ main := (argc: u32, argv: []string) -> int{
 
     loopCount := 0;
 
+   if 0 {
      while ans {
 
          ans = ans - 1;
          loopCount = loopCount + 1;
      }
-
+   }
     ans = test(3);
 
      while ans{

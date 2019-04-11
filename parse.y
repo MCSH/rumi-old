@@ -35,9 +35,10 @@ BlockNode *programBlock;
 %token DEFINE
 %token ASSIGN
 %token WHILE
+%token IF ELSE
 
 %type<program> program top_level
-%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration while_stmt
+%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration while_stmt if_stmt
 %type<function> function_definition
 %type<expr> value expr function_call op_expr arg
 %type<block> code
@@ -115,10 +116,16 @@ stmt
     | variable_assign
     | function_definition {$$=$1;}
     | while_stmt
+    | if_stmt
     ;
 
 while_stmt
     : WHILE expr '{' code '}'{$$=new WhileNode($2, $4);}
+    ;
+
+if_stmt
+    : IF expr '{' code '}' ELSE '{' code '}' {$$=new IfNode($2, $4, $8);}
+    | IF expr '{' code '}' {$$=new IfNode($2, $4, nullptr);}
     ;
 
 variable_assign

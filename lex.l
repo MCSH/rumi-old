@@ -26,6 +26,8 @@ int comment_nesting = 0;
 "string"   {return STRING;}
 "return"        {return RETURN;}
 "while" {return WHILE;}
+"if"    {return IF;}
+"else"  {return ELSE;}
 ":="    {return DEFINE_AND_ASSIGN;}
 "->"    {return RESULTS_IN;}
 "="     {return ASSIGN;}
