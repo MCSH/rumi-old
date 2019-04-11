@@ -156,7 +156,7 @@ class StatementNode: public Node{
         virtual llvm::Value* codegen(CompileContext *cc)=0;
 };
 
-class BlockNode: public Node{
+class BlockNode: public StatementNode{
     public:
         std::vector<StatementNode *> statements;
         virtual llvm::Value* codegen(CompileContext *cc);
@@ -292,8 +292,8 @@ class FunctionNode: public StatementNode{
 class WhileNode: public StatementNode{
     public:
     ExprNode *expr;
-    BlockNode *block;
-    WhileNode(ExprNode *expr, BlockNode *block){
+    StatementNode *block;
+    WhileNode(ExprNode *expr, StatementNode *block){
         this->expr = expr;
         this->block = block;
     }
@@ -304,9 +304,9 @@ class WhileNode: public StatementNode{
 class IfNode: public StatementNode{
     public:
         ExprNode *expr;
-        BlockNode *ifblock, *elseblock;
+        StatementNode *ifblock, *elseblock;
 
-        IfNode(ExprNode *expr, BlockNode *i1, BlockNode *i2){
+        IfNode(ExprNode *expr, StatementNode *i1, StatementNode *i2){
             this->expr = expr;
             ifblock = i1;
             elseblock = i2;

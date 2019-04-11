@@ -118,15 +118,16 @@ stmt
     | while_stmt
     | if_stmt
     | function_call ';' {$$=$1;}
+    | '{' code '}' {$$=$2;}
     ;
 
 while_stmt
-    : WHILE expr '{' code '}'{$$=new WhileNode($2, $4);}
+    : WHILE expr stmt {$$=new WhileNode($2, $3);}
     ;
 
 if_stmt
-    : IF expr '{' code '}' ELSE '{' code '}' {$$=new IfNode($2, $4, $8);}
-    | IF expr '{' code '}' {$$=new IfNode($2, $4, nullptr);}
+    : IF expr stmt ELSE stmt {$$=new IfNode($2, $3, $5);}
+    | IF expr stmt {$$=new IfNode($2, $3, nullptr);}
     ;
 
 variable_assign
