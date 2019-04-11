@@ -142,6 +142,7 @@ expr
     : function_call
     | op_expr
     | value
+    | '(' expr ')' {$$=$2;}
     ;
 
 op_expr

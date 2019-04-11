@@ -15,6 +15,11 @@ rumi:	clean $(OBJS)
 lex.cpp: lex.l parse.hpp
 	flex  -o lex.cpp lex.l
 
+test:	rum
+	./rum test.rum
+	gcc out.o lib.c
+	./a.out
+
 parse.hpp: parse.cpp
 
 parse.cpp: parse.y
