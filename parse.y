@@ -117,6 +117,7 @@ stmt
     | function_definition {$$=$1;}
     | while_stmt
     | if_stmt
+    | function_call ';' {$$=$1;}
     ;
 
 while_stmt

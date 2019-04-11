@@ -1,3 +1,4 @@
+print: (inp: u32);
 
 test :=(i: int) -> int{
     return i+1;
@@ -30,8 +31,9 @@ main := (argc: u32, argv: []string) -> int{
      while ans{
          ans = ans - 1;
          loopCount = loopCount + 1;
+         print(loopCount);
      }
-     
+
 
     return loopCount;
 }
