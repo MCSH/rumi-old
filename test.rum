@@ -35,5 +35,5 @@ main := (argc: u32, argv: []string) -> int{
      }
 
 
-    return loopCount;
+    return 0;
 }

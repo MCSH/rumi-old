@@ -18,7 +18,6 @@ lex.cpp: lex.l parse.hpp
 test:
 	./rum test.rum
 	gcc out.o lib.c
-	./a.out
 
 parse.hpp: parse.cpp
 
