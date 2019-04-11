@@ -34,9 +34,10 @@ BlockNode *programBlock;
 %token RETURN
 %token DEFINE
 %token ASSIGN
+%token WHILE
 
 %type<program> program top_level
-%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration
+%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration while_stmt
 %type<function> function_definition
 %type<expr> value expr function_call op_expr arg
 %type<block> code
@@ -113,6 +114,11 @@ stmt
     | variable_decl
     | variable_assign
     | function_definition {$$=$1;}
+    | while_stmt
+    ;
+
+while_stmt
+    : WHILE expr '{' code '}'{$$=new WhileNode($2, $4);}
     ;
 
 variable_assign
@@ -127,7 +133,8 @@ variable_decl
 expr
     : function_call
     | op_expr
-    | value;
+    | value
+    ;
 
 op_expr
     : expr '+' expr{$$=new OpExprNode($1,OP::PLUS,$3);}

@@ -15,5 +15,22 @@ This is a comment man, don't worry
 // Line comments work too, aint it cool?
 main := (argc: u32, argv: []string) -> int{
     ans := test(41);
-    return ans;
+
+    loopCount := 0;
+
+     while ans {
+
+         ans = ans - 1;
+         loopCount = loopCount + 1;
+     }
+
+    ans = test(3);
+
+     while ans{
+         ans = ans - 1;
+         loopCount = loopCount + 1;
+     }
+     
+
+    return loopCount;
 }

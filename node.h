@@ -114,6 +114,18 @@ class CompileContext{
             return global->namedTypes[name];
         }
 
+        llvm::AllocaInst* getNamedValue(std::string name){
+            // TODO replace usage of namedValues[..] with this func
+            for(std::vector<BlockContext *>::reverse_iterator i=block.rbegin(); i != block.rend(); i++){
+                auto nt = (*i)->namedValues;
+                auto p = nt.find(name);
+                if(p!=nt.end())
+                    return p->second;
+            }
+
+            return global->namedValues[name];
+        }
+
         void setType(std::string name, Types *type){
             if(hasBlock()){
                 block.back()->namedTypes[name] = type;
@@ -275,4 +287,16 @@ class FunctionNode: public StatementNode{
         this->declar = declar;
     }
     virtual llvm::Function* codegen(CompileContext *cc);
+};
+
+class WhileNode: public StatementNode{
+    public:
+    ExprNode *expr;
+    BlockNode *block;
+    WhileNode(ExprNode *expr, BlockNode *block){
+        this->expr = expr;
+        this->block = block;
+    }
+
+    virtual llvm::Value* codegen(CompileContext *cc);
 };

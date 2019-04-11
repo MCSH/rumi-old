@@ -167,7 +167,7 @@ llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
 }
 
 llvm::Value* VariableAssignNode::codegen(CompileContext *cc){
-    llvm::AllocaInst *alloc = cc->getBlock()->namedValues[name];
+    llvm::AllocaInst *alloc = cc->getNamedValue(name);
     
     if(!alloc){
         llvm::errs() << "Undefined variable " << name;
@@ -179,7 +179,7 @@ llvm::Value* VariableAssignNode::codegen(CompileContext *cc){
 }
 
 llvm::Value* VariableLoadNode::codegen(CompileContext *cc){
-    llvm::Value *v = cc->getBlock()->namedValues[name];
+    llvm::Value *v = cc->getNamedValue(name);
 
     if(!v){
         llvm::errs() << "Undefined variable " << name << "\n";
@@ -276,4 +276,41 @@ llvm::Value* OpExprNode::codegen(CompileContext *cc){
 Types *OpExprNode::resolveType(CompileContext *cc){
     // TODO improve later!
     return LHS->resolveType(cc);
+}
+
+llvm::Value* WhileNode::codegen(CompileContext *cc){
+    // TODO implement
+    // TODO context management?!
+
+    llvm::Function *f = cc->builder->GetInsertBlock()->getParent();
+
+    llvm::BasicBlock 
+        * whileCondBB = llvm::BasicBlock::Create(cc->context, "whilecond", f),
+        *whileBB = llvm::BasicBlock::Create(cc->context, "while"),
+        *whileEndBB = llvm::BasicBlock::Create(cc->context, "whilecont");
+
+    // Condition
+
+    cc->block.push_back(new BlockContext(whileCondBB));
+
+    cc->builder->CreateBr(whileCondBB);
+    cc->builder->SetInsertPoint(whileCondBB);
+    llvm::Value *cond = expr->codegen(cc);
+    cond = cc->builder->CreateICmpNE(cond, llvm::ConstantInt::get(llvm::Type::getInt64Ty(cc->context), 0, false), "whilecond");
+    cc->builder->CreateCondBr(cond, whileBB, whileEndBB);
+
+    // While Body
+    cc->block.push_back(new BlockContext(whileBB));
+    f->getBasicBlockList().push_back(whileBB);
+    cc->builder->SetInsertPoint(whileBB);
+    block->codegen(cc);
+    cc->builder->CreateBr(whileCondBB);
+
+    // Out of while
+    cc->block.pop_back();
+    cc->block.pop_back();
+    f->getBasicBlockList().push_back(whileEndBB);
+    cc->builder->SetInsertPoint(whileEndBB);
+
+    return nullptr;
 }
