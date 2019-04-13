@@ -49,6 +49,7 @@ BlockNode *programBlock;
 %type<var_decl> param
 %type<params> params param_list
 
+%left EQUAL
 %left '+' '-'
 %left '*' '/'
 
@@ -151,6 +152,7 @@ op_expr
     | expr '-' expr{$$=new OpExprNode($1,OP::SUB,$3);}
     | expr '*' expr{$$=new OpExprNode($1,OP::MULT,$3);}
     | expr '/' expr{$$=new OpExprNode($1,OP::DIVIDE,$3);}
+    | expr EQUAL expr{$$=new OpExprNode($1, OP::DIVIDE,$3);}
     ;
 
 function_call

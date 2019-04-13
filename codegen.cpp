@@ -268,6 +268,8 @@ llvm::Value* OpExprNode::codegen(CompileContext *cc){
         case OP::DIVIDE:
             instr = llvm::Instruction::SDiv;
             break;
+        case OP::EQUAL:
+            return cc->builder->CreateICmpEQ(lval, rval, "iseq");
     }
 
     return llvm::BinaryOperator::Create(instr, lval, rval, "", cc->getBlock()->bblock);

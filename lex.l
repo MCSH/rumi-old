@@ -29,6 +29,7 @@ int comment_nesting = 0;
 "if"    {return IF;}
 "else"  {return ELSE;}
 ":="    {return DEFINE_AND_ASSIGN;}
+"=="    {return EQUAL;}
 "->"    {return RESULTS_IN;}
 "="     {return ASSIGN;}
 ":"    {return DEFINE;}

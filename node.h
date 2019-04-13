@@ -244,7 +244,8 @@ enum class OP{
     PLUS,
     SUB,
     MULT,
-    DIVIDE
+    DIVIDE,
+    EQUAL
 };
 
 class OpExprNode: public ExprNode{
