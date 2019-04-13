@@ -36,6 +36,7 @@ BlockNode *programBlock;
 %token ASSIGN
 %token WHILE
 %token IF ELSE
+%token TRIPLE_DOT
 
 %type<program> program top_level
 %type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration while_stmt if_stmt
@@ -82,14 +83,18 @@ return_type
 
 params
     : param_list
-    | empty {$$=nullptr;};
+    | empty {$$=nullptr;}
+    ;
 
 param
-    : ID DEFINE type{$$=new VariableDeclNode(*$1, nullptr, $3);};
+    : ID DEFINE type{$$=new VariableDeclNode(*$1, nullptr, $3);}
+    | TRIPLE_DOT {$$=new VariableDeclNode("", nullptr, nullptr, true);}
+    ;
 
 param_list
     : param_list ',' param {$1->push_back($3); $$=$1;}
-    | param {$$=new std::vector<VariableDeclNode *>(); $$->push_back($1);};
+    | param {$$=new std::vector<VariableDeclNode *>(); $$->push_back($1);}
+    ;
 
 type
     : STRING {$$=new TypeNode(new ArrayTypes( new IntTypes(8) ));} // TODO change int8 to char?

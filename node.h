@@ -145,11 +145,13 @@ class VariableDeclNode: public StatementNode{
         std::string name;
         ExprNode *expr;
         TypeNode *type;
+        bool is_vararg;
 
-        VariableDeclNode(std::string name, ExprNode *expr, TypeNode *type){
+        VariableDeclNode(std::string name, ExprNode *expr, TypeNode *type, bool is_vararg=false){
             this->name = name;
             this->expr = expr;
             this->type = type;
+            this->is_vararg = is_vararg;
         }
         virtual llvm::Value* codegen(CompileContext *cc);
 };
@@ -218,10 +220,24 @@ class FunctionSignature: public StatementNode{
     std::string name;
     TypeNode *type;
     std::vector<VariableDeclNode *> *params;
+    bool has_vararg;
     FunctionSignature(std::string name, TypeNode *type, std::vector<VariableDeclNode*> *params){
         this->name = name;
         this->type = type;
         this->params = params;
+        if(params){
+            for(auto arg: *params){
+                if(arg == params->back())
+                    has_vararg = arg->is_vararg;
+                else
+                    if(arg->is_vararg){
+                        llvm::errs() << "You can not have varargs in middle of signature, function " << name << "\n";
+                        exit(1);
+                    }
+            } 
+            if(has_vararg)
+                params->pop_back();
+        }
     }
 
     virtual llvm::Function* codegen(CompileContext *cc);

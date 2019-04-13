@@ -97,7 +97,7 @@ llvm::Function* FunctionSignature::codegen(CompileContext *cc){
 
     cc->setType(name, this->type->type);
 
-    llvm::FunctionType *fT = llvm::FunctionType::get(type, args, false);
+    llvm::FunctionType *fT = llvm::FunctionType::get(type, args, has_vararg);
 
     auto F = llvm::Function::Create(fT, llvm::Function::ExternalLinkage, name, cc->module.get());
 
@@ -123,6 +123,8 @@ llvm::Value* RetNode::codegen(CompileContext *cc){
 
 llvm::Value* VariableDeclNode::codegen(CompileContext *cc){
     // TODO check global!
+    if(is_vararg)
+        return nullptr;
     if(cc->hasBlock()){
         if(expr){
             auto tmp = expr->resolveType(cc);

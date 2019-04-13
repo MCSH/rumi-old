@@ -31,6 +31,7 @@ int comment_nesting = 0;
 ":="    {return DEFINE_AND_ASSIGN;}
 "=="    {return EQUAL;}
 "->"    {return RESULTS_IN;}
+"..."   {return TRIPLE_DOT;}
 "="     {return ASSIGN;}
 ":"    {return DEFINE;}
 "("     {return '(';}
