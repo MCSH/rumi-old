@@ -55,6 +55,10 @@ BlockNode *programBlock;
 %left '*' '/'
 
 
+// hack to fix if else problem
+%nonassoc "then"
+%nonassoc ELSE
+
 %start program
 %define parse.error verbose
 
@@ -132,8 +136,8 @@ while_stmt
     ;
 
 if_stmt
-    : IF expr stmt ELSE stmt {$$=new IfNode($2, $3, $5);}
-    | IF expr stmt {$$=new IfNode($2, $3, nullptr);}
+    : IF expr stmt %prec "then" {$$=new IfNode($2, $3, nullptr);}
+    | IF expr stmt ELSE stmt {$$=new IfNode($2, $3, $5);}
     ;
 
 variable_assign
