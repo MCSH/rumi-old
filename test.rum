@@ -19,7 +19,7 @@ main := (argc: u32, argv: []string) -> int{
 
     loopCount := 0;
 
-   if(ans == 43){
+   if(ans == 42){
      while ans {
 
          ans = ans - 1;

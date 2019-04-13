@@ -48,7 +48,7 @@ llvm::Function* FunctionNode::codegen(CompileContext *cc){
     body -> codegen(cc);
 
     auto myType = fs->type->type;
-    bool is_void = myType->type==PrimTypes::VOID;
+    bool is_void = myType->ptype==PrimTypes::VOID;
     RetNode *p = NULL;
     llvm::Value *last = NULL;
     for(auto statement: body->statements){
@@ -224,30 +224,28 @@ llvm::Type* TypeNode::codegen(CompileContext *cc){
             (new TypeNode(ar->base))->codegen(cc)
                 );
     }
-    switch(type->type){
-        case PrimTypes::INT:
-            if(!type->size) 
-                // TODO return c int, for now 64
+
+    if(type->ptype == PrimTypes::INT){
+        IntTypes *t = (IntTypes*)type;
+        if(!t->size) 
+            // TODO return c int, for now 64
+            return llvm::Type::getInt64Ty(cc->context);
+        switch(t->size){
+            case 1:
+                return llvm::Type::getInt1Ty(cc->context);
+            case 8:
+                return llvm::Type::getInt8Ty(cc->context);
+            case 16:
+                return llvm::Type::getInt16Ty(cc->context);
+            case 32:
+                return llvm::Type::getInt32Ty(cc->context);
+            case 64:
                 return llvm::Type::getInt64Ty(cc->context);
-            switch(type->size){
-                case 1:
-                    return llvm::Type::getInt1Ty(cc->context);
-                case 8:
-                    return llvm::Type::getInt8Ty(cc->context);
-                case 16:
-                    return llvm::Type::getInt16Ty(cc->context);
-                case 32:
-                    return llvm::Type::getInt32Ty(cc->context);
-                case 64:
-                    return llvm::Type::getInt64Ty(cc->context);
-                case 128:
-                    return llvm::Type::getInt128Ty(cc->context);
-            }
-        case PrimTypes::STRING:
-            return llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cc->context));
-        case PrimTypes::VOID:
+            case 128:
+                return llvm::Type::getInt128Ty(cc->context);
+        }
+    } else if(type->ptype == PrimTypes::VOID)
             return llvm::Type::getVoidTy(cc->context);
-    }
 }
 
 llvm::Value* OpExprNode::codegen(CompileContext *cc){

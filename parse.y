@@ -77,7 +77,7 @@ function_declaration
     : ID DEFINE '(' params ')' return_type ';' {$$=new FunctionSignature(*$1, $6, $4);};
 
 return_type
-    : empty {$$=new TypeNode(new Types(PrimTypes::VOID));}// Void
+    : empty {$$=new TypeNode(new VoidTypes());}// Void
     | RESULTS_IN type {$$=$2;};
 
 params
@@ -92,14 +92,14 @@ param_list
     | param {$$=new std::vector<VariableDeclNode *>(); $$->push_back($1);};
 
 type
-    : STRING {$$=new TypeNode(new Types(PrimTypes::STRING));}
-    | INT {$$=new TypeNode(new Types(PrimTypes::INT));}
-    | INT1 {$$=new TypeNode(new Types(PrimTypes::INT, 1));}
-    | INT8 {$$=new TypeNode(new Types(PrimTypes::INT, 8));}
-    | INT16 {$$=new TypeNode(new Types(PrimTypes::INT, 16));}
-    | INT32 {$$=new TypeNode(new Types(PrimTypes::INT, 32));}
-    | INT64 {$$=new TypeNode(new Types(PrimTypes::INT, 64));}
-    | INT128 {$$=new TypeNode(new Types(PrimTypes::INT, 128));}
+    : STRING {$$=new TypeNode(new ArrayTypes( new IntTypes(8) ));} // TODO change int8 to char?
+    | INT {$$=new TypeNode(new IntTypes(64));}
+    | INT1 {$$=new TypeNode(new IntTypes(1));}
+    | INT8 {$$=new TypeNode(new IntTypes(8));}
+    | INT16 {$$=new TypeNode(new IntTypes(16));}
+    | INT32 {$$=new TypeNode(new IntTypes(32));}
+    | INT64 {$$=new TypeNode(new IntTypes(64));}
+    | INT128 {$$=new TypeNode(new IntTypes(128));}
     | array_type;
 
 array_type
