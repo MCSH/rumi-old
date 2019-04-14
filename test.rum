@@ -19,6 +19,8 @@ main := (argc: u32, argv: []string) -> int{
 
     printf("This is a test\n");
 
+    printf("Testing vararg calling by doing %s stuff!\n", "crazy");
+
     ans := test(41, 3);
 
     loopCount := 0;
