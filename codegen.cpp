@@ -359,3 +359,13 @@ llvm::Value* IfNode::codegen(CompileContext *cc){
 
     return nullptr;
 }
+
+Types* SStringNode::resolveType(CompileContext *cc){
+    return new ArrayTypes(new IntTypes(8)); // TODO change int8 to char?
+}
+
+llvm::Value* SStringNode::codegen(CompileContext *cc){
+    // TODO
+    // return llvm::ConstantDataArray::getString(cc->context, val, true);
+    return cc->builder->CreateGlobalStringPtr(val);
+}

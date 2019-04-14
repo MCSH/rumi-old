@@ -1,4 +1,5 @@
 print: (inp: u32);
+printf: (format: string, ...);
 
 test :=(i: int, ...) -> int{
     return i+1;
@@ -15,6 +16,9 @@ This is a comment man, don't worry
 
 // Line comments work too, aint it cool?
 main := (argc: u32, argv: []string) -> int{
+
+    printf("This is a test\n");
+
     ans := test(41, 3);
 
     loopCount := 0;

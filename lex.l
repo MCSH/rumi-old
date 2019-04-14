@@ -53,6 +53,8 @@ int comment_nesting = 0;
 
 {WHITESPACE}+      {/*Discard */}
 
+\"(\\.|[^"\\])*\" {yylval.string = new std::string(yytext); return SSTRING;}
+
 "/*"    {BEGIN(COMMENT);}
 <COMMENT>{
    "/*" {++comment_nesting;} 

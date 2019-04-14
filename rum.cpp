@@ -33,7 +33,7 @@ int main(int argc, char **argv){
     auto Features = "";
 
     llvm::TargetOptions opt;
-    auto RM = llvm::Optional<llvm::Reloc::Model>();
+    auto RM = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::Model::PIC_); // Make it PIC
     auto targetMachine = target -> createTargetMachine(targetTriple, CPU, Features, opt, RM);
 
     cc-> module->setDataLayout(targetMachine->createDataLayout());

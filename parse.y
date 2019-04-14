@@ -26,7 +26,7 @@ BlockNode *programBlock;
 }
 
 %token<string> OCT DEC
-%token<string> ID
+%token<string> ID SSTRING
 %token INT INT1 INT8 INT16 INT32 INT64 INT128
 %token STRING
 %token DEFINE_AND_ASSIGN
@@ -185,7 +185,9 @@ return_stmt
 value
     : ID { $$ = new VariableLoadNode(*$1);} // TODO
     | OCT {$$ = new IntNode(strtol($1->c_str(), NULL, 8));}
-    | DEC { $$ = new IntNode(atoi($1->c_str())); };  // TODO check for long?
+    | DEC { $$ = new IntNode(atoi($1->c_str())); }  // TODO check for long?
+    | SSTRING {$$=new SStringNode($1->c_str());}
+    ;
 
 
 %%

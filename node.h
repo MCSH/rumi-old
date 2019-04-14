@@ -4,6 +4,7 @@
 #include <llvm/IR/Value.h>
 
 #include <iostream>
+#include <sstream> 
 
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
@@ -279,4 +280,31 @@ class IfNode: public StatementNode{
             elseblock = i2;
         }
     virtual llvm::Value* codegen(CompileContext *cc);
+};
+
+class SStringNode: public ExprNode{
+    public:
+        std::string val;
+        SStringNode(std::string val){
+            std::stringstream ss{""};
+
+            for(int i = 1; i < val.length()-1; i++){
+                if(val.at(i)=='\\'){
+                    switch(val.at(i+1)){
+                        case 'n':
+                            ss<<'\n';i++;break;
+                        case '"':
+                            ss<<'\"';i++;break;
+                        default:
+                            ss<<'\\';
+                    }
+                } else{
+                    ss << val.at(i);
+                }
+            }
+
+            this->val = ss.str();
+        }
+        virtual llvm::Value* codegen(CompileContext *cc);
+        virtual Types* resolveType(CompileContext *cc);
 };
