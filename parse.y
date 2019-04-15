@@ -21,6 +21,8 @@ BlockNode *programBlock;
     ExprNode *expr;
     TypeNode *type;
     VariableDeclNode *var_decl;
+    StructMemberNode *struct_member;
+    std::vector<StructMemberNode *> *members;
     std::vector<VariableDeclNode*> *params;
     std::vector<ExprNode *> *args;
 }
@@ -37,11 +39,12 @@ BlockNode *programBlock;
 %token WHILE
 %token IF ELSE
 %token TRIPLE_DOT
+%token STRUCT
 
 %type<program> program top_level
-%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration while_stmt if_stmt
+%type<statement> top_level_code return_stmt stmt variable_decl variable_assign function_declaration while_stmt if_stmt struct_define struct_member_set
 %type<function> function_definition
-%type<expr> value expr function_call op_expr arg
+%type<expr> value expr function_call op_expr arg struct_member_access
 %type<block> code
 %type<type> return_type type array_type
 
@@ -49,6 +52,9 @@ BlockNode *programBlock;
 
 %type<var_decl> param
 %type<params> params param_list
+
+%type<struct_member> struct_member
+%type<members> struct_members
 
 %left EQUAL
 %left '+' '-'
@@ -72,7 +78,9 @@ top_level
 
 top_level_code
     : function_definition {$$ = $1;}
-    | function_declaration{$$=$1;};
+    | function_declaration{$$=$1;}
+    | struct_define
+    ;
 
 function_definition
     : ID DEFINE_AND_ASSIGN '(' params ')' return_type '{' code '}' { $$ = new FunctionNode($8, new FunctionSignature(*$1, $6, $4), true);}
@@ -109,7 +117,9 @@ type
     | INT32 {$$=new TypeNode(new IntTypes(32));}
     | INT64 {$$=new TypeNode(new IntTypes(64));}
     | INT128 {$$=new TypeNode(new IntTypes(128));}
-    | array_type;
+    | array_type
+    | ID {$$=new TypeNode(new StructType(*$1));}
+    ;
 
 array_type
     : '[' ']' type {$$=new TypeNode(new ArrayTypes($3->type));};
@@ -124,11 +134,13 @@ stmt
     : return_stmt
     | variable_decl
     | variable_assign
+    | struct_member_set
     | function_definition {$$=$1;}
     | while_stmt
     | if_stmt
     | function_call ';' {$$=$1;}
     | '{' code '}' {$$=$2;}
+    | struct_define
     ;
 
 while_stmt
@@ -154,6 +166,15 @@ expr
     | op_expr
     | value
     | '(' expr ')' {$$=$2;}
+    | struct_member_access /* TODO Shift reduce problem is here probably */
+    ;
+
+struct_member_access
+    : expr '.' ID {$$=new StructMemberAccessNode($1, *$3);}
+    ;
+
+struct_member_set
+    : expr '.' ID ASSIGN expr ';' {$$=new StructMemberSetNode($1, *$3, $5);}
     ;
 
 op_expr
@@ -187,6 +208,19 @@ value
     | OCT {$$ = new IntNode(strtol($1->c_str(), NULL, 8));}
     | DEC { $$ = new IntNode(atoi($1->c_str())); }  // TODO check for long?
     | SSTRING {$$=new SStringNode($1->c_str());}
+    ;
+
+struct_define
+    : STRUCT ID '{' struct_members '}' {$$=new StructNode(*$2, $4);}
+    ;
+
+struct_members
+    : struct_member struct_members {$$=$2; $$->push_back($1);}
+    | struct_member {$$=new std::vector<StructMemberNode *>;$$->push_back($1);}
+    ;
+
+struct_member
+    : ID DEFINE type ';' {$$=new StructMemberNode(*$1, $3);}
     ;
 
 

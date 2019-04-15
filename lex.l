@@ -28,6 +28,7 @@ int comment_nesting = 0;
 "while" {return WHILE;}
 "if"    {return IF;}
 "else"  {return ELSE;}
+"struct" {return STRUCT;}
 ":="    {return DEFINE_AND_ASSIGN;}
 "=="    {return EQUAL;}
 "->"    {return RESULTS_IN;}
@@ -46,6 +47,7 @@ int comment_nesting = 0;
 "-"     {return '-';}
 "*"     {return '*';}
 "/"     {return '/';}
+"."     {return '.';}
 
 {NONZERODIGIT}{DIGIT}*        {yylval.string=new std::string(yytext); return DEC;}
 "0"{OCTDIGIT}*  {yylval.string = new std::string(yytext); return OCT;}

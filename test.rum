@@ -13,13 +13,18 @@ This is a comment man, don't worry
 /* nested comments!
 */ C would not understand this, hahaha!*/
 
+struct test_s {
+  id: u32;
+}
 
 // Line comments work too, aint it cool?
 main := (argc: u32, argv: []string) -> int{
 
-    printf("This is a test\n");
+    s1: test_s;
 
-    printf("Testing vararg calling by doing %s stuff!\n", "crazy");
+    s1.id = 3222; // TODO this isn't working!
+
+    printf("My struct id is %d\n", s1.id);
 
     ans := test(41, 3);
 
