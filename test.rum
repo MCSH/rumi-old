@@ -11,20 +11,29 @@ This is a comment man, don't worry
 
 /* You know what would be cool?
 /* nested comments!
-*/ C would not understand this, hahaha!*/
+*/ C would not understand this, hahaha!
+Apparently emacs can't handle the either*/
 
 struct test_s {
-  id: u32;
+  id: u64;
 }
 
-// Line comments work too, aint it cool?
-main := (argc: u32, argv: []string) -> int{
+struct_test := (){
 
     s1: test_s;
 
     s1.id = 3222; // TODO this isn't working!
 
     printf("My struct id is %d\n", s1.id);
+
+    return;
+
+}
+
+// Line comments work too, aint it cool?
+main := (argc: u32, argv: []string) -> int{
+
+    struct_test();
 
     ans := test(41, 3);
 

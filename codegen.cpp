@@ -210,7 +210,8 @@ llvm::Value* FunctionCallNode::codegen(CompileContext *cc){
             argsV.push_back(arg->codegen(cc));
         }
 
-
+    if(cc->getType(name.c_str())->ptype==PrimTypes::VOID)
+        return cc->builder->CreateCall(calleeF, argsV, "");
     return cc->builder->CreateCall(calleeF, argsV, "calltmp");
 }
 
@@ -447,7 +448,7 @@ llvm::Value* StructMember::getPtr(CompileContext *cc){
 
     auto ptr = llvm::PointerType::getUnqual(stype);
 
-    return cc->builder->CreateGEP(stype, alloc, indices, "");
+    return llvm::GetElementPtrInst::Create(stype, alloc, indices, "", cc->getBlock()->bblock);
 }
 
 Types* StructMember::resolveType(CompileContext *cc){
