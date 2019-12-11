@@ -20,14 +20,10 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "types.h"
 
-class StructNode;
-
 class BlockContext{
     public:
         std::map<std::string, llvm::AllocaInst *> namedValues; // Maybe should be Value*?
         std::map<std::string, Types*> namedTypes;
-        std::map<std::string, llvm::StructType*> structTypes;
-        std::map<std::string, StructNode*> structs;
         llvm::BasicBlock *bblock;
 
         BlockContext(llvm::BasicBlock *bb){
@@ -81,45 +77,6 @@ class CompileContext{
             return global->namedValues[name];
         }
 
-        llvm::StructType* getStructType(std::string name){
-            for(std::vector<BlockContext *>::reverse_iterator i=block.rbegin(); i != block.rend(); i++){
-                auto nt = (*i)->structTypes;
-                auto p = nt.find(name);
-                if(p!=nt.end())
-                    return p->second;
-            }
-
-            return global->structTypes[name];
-        }
-
-        StructNode* getStruct(std::string name){
-            for(std::vector<BlockContext *>::reverse_iterator i=block.rbegin(); i != block.rend(); i++){
-                auto nt = (*i)->structs;
-                auto p = nt.find(name);
-                if(p!=nt.end())
-                    return p->second;
-            }
-
-            return global->structs[name];
-        }
-
-        void setStruct(std::string name, StructNode *s){
-            if(hasBlock()){
-                block.back()->structs[name] = s;
-                return;
-            }
-
-            global-> structs[name] = s;
-        }
-
-        void setStructType(std::string name, llvm::StructType *t){
-            if(hasBlock()){
-                block.back()->structTypes[name] = t;
-                return;
-            }
-
-            global->structTypes[name] = t;
-        }
 
         void setType(std::string name, Types *type){
             if(hasBlock()){
@@ -353,69 +310,3 @@ class SStringNode: public ExprNode{
         virtual Types* resolveType(CompileContext *cc);
 };
 
-class StructMemberNode: public StatementNode{
-    public:
-        std::string name;
-        TypeNode *type;
-
-        StructMemberNode(std::string name, TypeNode *type){
-            this->name = name;
-            this->type = type;
-        }
-
-        // TODO
-        virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types* resolveType(CompileContext *cc);
-};
-
-class StructNode: public StatementNode{
-    public:
-        std::string name;
-        std::vector<StructMemberNode *> *members;
-
-        StructNode(std::string name, std::vector<StructMemberNode *> *members){
-            this->name = name;
-            this->members = members;
-        }
-        virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types* resolveType(CompileContext *cc);
-};
-
-class StructMember{
-    public:
-        std::string member;
-        ExprNode *expr;
-
-        StructMember(ExprNode *expr, std::string name){
-            this->member = name;
-            this->expr = expr;
-        }
-
-        virtual Types* resolveType(CompileContext *cc);
-        virtual llvm::Value* getPtr(CompileContext *cc);
-};
-
-class StructMemberAccessNode: public ExprNode{
-    public:
-        StructMember *mem;
-
-        StructMemberAccessNode(ExprNode *expr, std::string name){
-            this->mem = new StructMember(expr, name);
-        }
-
-        virtual llvm::Value* codegen(CompileContext *cc);
-        virtual Types* resolveType(CompileContext *cc);
-};
-
-class StructMemberSetNode: public StatementNode{
-    public:
-        StructMember *mem;
-        ExprNode *expr;
-
-        StructMemberSetNode(ExprNode *expr, std::string name, ExprNode *val){
-            this->mem = new StructMember(expr, name);
-            this->expr = val;
-        }
-
-        virtual llvm::Value* codegen(CompileContext *cc);
-};

@@ -6,7 +6,6 @@ enum class PrimTypes{
     INT,
     VOID,
     ARRAY,
-    STRUCT
 };
 
 class Types{
@@ -48,13 +47,4 @@ class ArrayTypes: public Types{
             ArrayTypes *t = (ArrayTypes*) that;
             return base->compatible(t->base);
         };
-};
-
-class StructType: public Types{
-    public:
-        std::string name;
-        StructType(std::string name){
-            this->ptype = PrimTypes::STRUCT;
-            this->name = name;
-        }
 };

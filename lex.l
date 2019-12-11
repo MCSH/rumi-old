@@ -28,7 +28,6 @@ int comment_nesting = 0;
 "while" {return WHILE;}
 "if"    {return IF;}
 "else"  {return ELSE;}
-"struct" {return STRUCT;}
 ":="    {return DEFINE_AND_ASSIGN;}
 "=="    {return EQUAL;}
 "->"    {return RESULTS_IN;}
